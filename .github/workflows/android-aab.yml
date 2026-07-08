@@ -1,0 +1,32 @@
+name: Build NEXO Ride AAB 7S
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-aab:
+    runs-on: ubuntu-latest
+    name: Build Android App Bundle
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: 8.10.2
+      - name: Build AAB
+        working-directory: apk
+        run: gradle :app:bundleRelease --stacktrace
+      - name: Upload AAB artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: NEXO_Ride_AAB_Sprint7Y_RC1
+          path: apk/app/build/outputs/bundle/release/*.aab
+          retention-days: 30

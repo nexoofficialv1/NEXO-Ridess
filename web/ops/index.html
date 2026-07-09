@@ -1,0 +1,29 @@
+<!doctype html><html lang="bn"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>NEXO Ride Ops Monitor</title><style>
+:root{color-scheme:dark;--bg:#070b1f;--card:#101a3d;--card2:#0b1330;--txt:#f6fbff;--muted:#aebdf5;--cyan:#7df9ff;--ok:#4ade80;--warn:#facc15;--bad:#fb7185}*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Noto Sans Bengali,sans-serif;background:radial-gradient(circle at top,#16256a,#070b1f 45%,#040712);color:var(--txt)}header{padding:22px 18px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;gap:12px;justify-content:space-between;align-items:center;flex-wrap:wrap}.brand{font-size:22px;font-weight:900}.pill{border:1px solid rgba(125,249,255,.35);padding:8px 12px;border-radius:999px;color:var(--cyan);font-weight:800;background:rgba(125,249,255,.08)}main{padding:18px;max-width:1200px;margin:auto}.grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:14px}.card{background:linear-gradient(180deg,rgba(255,255,255,.06),rgba(255,255,255,.02));border:1px solid rgba(255,255,255,.08);border-radius:18px;padding:16px;box-shadow:0 10px 30px rgba(0,0,0,.25)}.num{font-size:30px;font-weight:950;margin-top:8px}.muted{color:var(--muted);font-size:13px}.wide{grid-column:span 2}.full{grid-column:1/-1}.ok{color:var(--ok)}.warn{color:var(--warn)}.bad{color:var(--bad)}table{width:100%;border-collapse:collapse}td,th{padding:10px;border-bottom:1px solid rgba(255,255,255,.08);text-align:left;vertical-align:top}button,select{border:0;border-radius:12px;padding:10px 14px;font-weight:900}button{background:var(--cyan);color:#04101a}select{background:#101a3d;color:white;border:1px solid rgba(255,255,255,.16)}pre{white-space:pre-wrap;background:#050817;border-radius:14px;padding:12px;overflow:auto}@media(max-width:850px){.grid{grid-template-columns:1fr 1fr}.wide{grid-column:1/-1}}@media(max-width:520px){.grid{grid-template-columns:1fr}}
+</style></head><body><header><div><div class="brand">NEXO Ride · Production Ops Monitor</div><div class="muted">5000 → 10000 driver scale readiness, dispatch queue, payment, live driver health</div></div><div class="pill" id="profile">Loading</div></header><main>
+<div class="grid" id="cards"></div>
+<div class="grid" style="margin-top:14px"><div class="card wide"><h3>Readiness Checks</h3><table id="checks"></table></div><div class="card wide"><h3>Alerts</h3><table id="alerts"></table></div></div>
+<div class="card full" style="margin-top:14px"><h3>Capacity Profile</h3><p class="muted">Profile বদলালে API ভাঙবে না। Existing data delete হবে না। Production 5k/10k-এর জন্য PostgreSQL + Redis GEO configure করা দরকার।</p><select id="cap"><option>PILOT_5K</option><option>CITY_10K</option><option>DISTRICT_25K</option></select> <button onclick="applyProfile()">Apply Profile</button> <span class="muted" id="applyMsg"></span></div>
+<div class="card full" style="margin-top:14px"><h3>Raw Metrics</h3><pre id="raw"></pre></div>
+</main><script>
+const token=localStorage.getItem('nexo_token')||localStorage.getItem('token')||'';
+function cls(ok){return ok?'ok':'bad'}
+function tr(a){return '<tr>'+a.map(x=>'<td>'+x+'</td>').join('')+'</tr>'}
+async function load(){
+ const h=token?{Authorization:'Bearer '+token}:{}, r=await fetch('/api/platform/ops-readiness',{headers:h}); const d=await r.json();
+ document.getElementById('profile').textContent=(d.metrics?.capacity_profile?.name||'PROFILE')+' · Score '+(d.readiness?.score_percent||0)+'%';
+ const m=d.metrics||{}; const cards=[['Registered Drivers',m.fleet?.registered,m.fleet?.target_registered],['Online Drivers',m.fleet?.online,m.fleet?.target_active],['Busy Drivers',m.fleet?.busy,'active ride'],['Open Dispatch Queue',m.dispatch?.open_queue,m.dispatch?.engine],['Active Rides',m.rides?.active,'running'],['Completed Today',m.rides?.today_completed,'today'],['Pending Payment',m.payment?.pending_payment_rides,m.payment?.provider],['DB Size MB',m.storage?.db_size_mb,m.storage?.mode]];
+ document.getElementById('cards').innerHTML=cards.map(c=>`<div class="card"><div class="muted">${c[0]}</div><div class="num">${c[1]??0}</div><div class="muted">${c[2]??''}</div></div>`).join('');
+ document.getElementById('checks').innerHTML='<tr><th>Status</th><th>Check</th><th>Detail</th></tr>'+((d.readiness?.checks||[]).map(c=>tr([`<b class="${cls(c.ok)}">${c.ok?'OK':'NEEDS WORK'}</b>`,c.title,c.detail||''])).join(''));
+ document.getElementById('alerts').innerHTML='<tr><th>Level</th><th>Alert</th></tr>'+((d.alerts||[]).length?d.alerts.map(a=>tr([`<b class="${a.level==='CRITICAL'?'bad':a.level==='WARNING'?'warn':'ok'}">${a.level}</b>`,a.message])).join(''):tr(['<b class="ok">OK</b>','No active alerts']));
+ document.getElementById('raw').textContent=JSON.stringify(d,null,2);
+ const cap=document.getElementById('cap'); if(m.capacity_profile?.name) cap.value=m.capacity_profile.name;
+}
+async function applyProfile(){
+ const msg=document.getElementById('applyMsg'); msg.textContent='Applying...';
+ if(!token){msg.textContent='Admin login token not found in this browser.'; return;}
+ const r=await fetch('/api/admin/capacity-profile',{method:'POST',headers:{'Content-Type':'application/json',Authorization:'Bearer '+token},body:JSON.stringify({profile:document.getElementById('cap').value})});
+ const d=await r.json(); msg.textContent=d.ok?'Applied: '+d.profile:(d.detail||'Failed'); await load();
+}
+load(); setInterval(load,10000);
+</script></body></html>

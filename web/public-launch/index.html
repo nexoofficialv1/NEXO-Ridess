@@ -1,0 +1,17 @@
+<!doctype html><html lang='bn'><head><meta charset='utf-8'><meta name='viewport' content='width=device-width,initial-scale=1'><title>NEXO Ride Public Launch</title><style>
+:root{--bg:#071023;--card:#101a35;--line:#22345f;--text:#eef5ff;--muted:#a9b9df;--accent:#1de9b6;--accent2:#6ea8ff;--bad:#ff6b6b;--warn:#ffd166}*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Noto Sans Bengali,sans-serif;background:linear-gradient(160deg,#071023,#0a1635);color:var(--text)}header{padding:22px 18px;background:rgba(6,12,30,.92);position:sticky;top:0;border-bottom:1px solid var(--line);z-index:2}h1{margin:0;font-size:24px}p{color:var(--muted);line-height:1.55}.wrap{max-width:1100px;margin:auto;padding:18px}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}.card{background:rgba(16,26,53,.92);border:1px solid var(--line);border-radius:18px;padding:16px;box-shadow:0 10px 30px rgba(0,0,0,.18)}a.btn,button{display:inline-block;border:0;border-radius:12px;padding:12px 14px;margin:6px 6px 6px 0;background:linear-gradient(135deg,var(--accent),var(--accent2));color:#061022;font-weight:900;text-decoration:none;cursor:pointer}.ghost{background:#162448!important;color:var(--text)!important}.muted{color:var(--muted)}.ok{color:var(--accent)}.bad{color:var(--bad)}.warn{color:var(--warn)}.poster{background:#fff;color:#061022;border-radius:18px;padding:18px;min-height:240px}.poster h2{margin:0 0 10px}.qrbox{height:150px;border:3px dashed #111;border-radius:14px;display:flex;align-items:center;justify-content:center;font-weight:900;color:#111;margin:12px 0}.small{font-size:13px}.pill{display:inline-block;padding:5px 9px;border-radius:999px;border:1px solid var(--line);color:var(--muted);margin:3px}input,textarea,select{width:100%;padding:11px;border-radius:10px;border:1px solid var(--line);background:#0b1530;color:var(--text);margin:6px 0}.toolbar{margin:10px 0 16px}@media print{header,.toolbar,.screen-only{display:none!important}body{background:#fff}.wrap{max-width:none}.card{box-shadow:none;border:0}.poster{break-inside:avoid;border:2px solid #111;margin-bottom:20px}.grid{grid-template-columns:1fr 1fr}}</style></head><body>
+<header><h1>🚖 NEXO Ride Public Launch</h1><p>Account ছাড়া passenger booking, trusted driver login, QR stand booking, SOS safety ও receipt-ready ride flow.</p></header>
+<div class='wrap'>
+  <div class='toolbar'><a class='btn' href='/qr/'>Book Ride</a><a class='btn ghost' href='/qr-scanner/'>QR Scanner</a><a class='btn ghost' href='/driver-onboarding/'>Become a Driver</a><a class='btn ghost' href='/support-center/'>Support</a></div>
+  <div class='grid' id='cards'></div>
+  <div class='card'><h2>Launch Readiness</h2><div id='readiness'>Loading...</div></div>
+</div>
+<script>
+async function load(){
+ const kit=await fetch('/api/public/launch-kit').then(r=>r.json()).catch(()=>({}));
+ const ready=await fetch('/api/platform/public-launch-readiness').then(r=>r.json()).catch(()=>({}));
+ const cards=(kit.public_launch?.public_cards||['Book Ride','QR Booking','Safety','Receipt']).map(x=>`<div class='card'><h3>${x}</h3><p>বাংলা/English friendly field launch support.</p></div>`).join('');
+ document.getElementById('cards').innerHTML=cards;
+ document.getElementById('readiness').innerHTML=(ready.checks||[]).map(c=>`<p><b class='${c.ok?'ok':'bad'}'>${c.ok?'✅':'❌'}</b> ${c.title}<br><span class='muted small'>${c.detail||''}</span></p>`).join('') || 'No readiness data';
+} load();
+</script></body></html>

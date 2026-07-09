@@ -1,0 +1,1 @@
+const fs=require('fs'); const path=require('path'); const pkg=require('../package.json'); console.log(JSON.stringify({ok:true,sprint:'7X',package:pkg.name,version:pkg.version,warning:'This local script validates package presence only. Server endpoint /api/platform/environment-freeze-report gives full runtime status.'},null,2));

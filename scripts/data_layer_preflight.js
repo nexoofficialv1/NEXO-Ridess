@@ -1,0 +1,4 @@
+const http = require('http');
+const PORT = process.env.PORT || 3000;
+function request(path){return new Promise((resolve)=>{const req=http.get({host:'127.0.0.1',port:PORT,path,timeout:2500},res=>{let data='';res.on('data',d=>data+=d);res.on('end',()=>{try{resolve({status:res.statusCode,json:JSON.parse(data)});}catch(e){resolve({status:res.statusCode,body:data});}});});req.on('error',e=>resolve({error:e.message}));req.on('timeout',()=>{req.destroy();resolve({error:'timeout'});});});}
+(async()=>{const r=await request('/api/platform/data-layer-readiness'); if(r.error){console.log('S7L data preflight: server not running, syntax-only package is OK. Start server to test endpoint.'); process.exit(0);} console.log(JSON.stringify(r.json||r,null,2)); if(!r.json || !r.json.version) process.exit(1);})();

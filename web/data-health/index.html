@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="bn">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>NEXO Ride Data Health</title>
+<style>
+:root{font-family:system-ui,-apple-system,Segoe UI,sans-serif;background:#071022;color:#eef6ff}body{margin:0;background:linear-gradient(135deg,#071022,#101b3d);min-height:100vh}.wrap{max-width:1100px;margin:0 auto;padding:18px}.top{display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap}.badge{padding:8px 12px;border-radius:999px;background:#12315f;color:#9ee7ff;font-weight:800}.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}.card{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);border-radius:18px;padding:16px;box-shadow:0 10px 30px rgba(0,0,0,.25)}h1,h2,h3{margin:.2rem 0 .8rem}.ok{color:#7dffb2}.bad{color:#ff9c9c}.muted{color:#a8b8d8}.row{display:flex;justify-content:space-between;gap:10px;border-bottom:1px solid rgba(255,255,255,.08);padding:8px 0}.btn{border:0;border-radius:12px;background:#25d6ff;color:#001428;font-weight:900;padding:12px 14px;cursor:pointer}.btn.secondary{background:#1b2b55;color:#d8f7ff}code{background:#020711;padding:2px 6px;border-radius:7px}pre{white-space:pre-wrap;background:#020711;border-radius:14px;padding:12px;overflow:auto}.pill{display:inline-block;margin:3px;padding:4px 8px;border-radius:99px;background:#1b2b55}.warn{background:#523616;color:#ffdca1}</style>
+</head>
+<body><div class="wrap">
+<div class="top"><div><h1>📊 NEXO Ride Data Health</h1><p class="muted">Sprint-7L Database Migration + Redis/PostgreSQL Upgrade Bridge</p></div><div><button class="btn" onclick="load()">Refresh</button> <a class="btn secondary" href="/api/platform/data-layer-readiness">Public JSON</a></div></div>
+<div id="status" class="badge">Loading...</div>
+<div class="grid" id="cards"></div>
+<div class="card"><h2>Migration Registry</h2><div id="migrations"></div></div>
+<div class="card"><h2>Next Safe Commands</h2><pre id="commands"></pre></div>
+<div class="card"><h2>Raw Readiness</h2><pre id="raw"></pre></div>
+</div>
+<script>
+function row(k,v,ok){return `<div class="row"><span>${k}</span><b class="${ok===false?'bad':ok===true?'ok':''}">${v}</b></div>`}
+function card(title, rows){return `<div class="card"><h2>${title}</h2>${rows.join('')}</div>`}
+async function fetchJson(url){const r=await fetch(url); return r.json();}
+async function load(){
+  document.getElementById('status').textContent='Checking...';
+  const [data,mig,bridge,adapter]=await Promise.all([
+    fetchJson('/api/platform/data-layer-readiness'),fetchJson('/api/platform/migration-readiness'),fetchJson('/api/platform/redis-postgres-readiness'),fetchJson('/api/platform/dispatch-adapter-readiness')
+  ]);
+  document.getElementById('status').innerHTML=data.ok?'<span class="ok">Ready for configured target</span>':'<span class="bad">Needs upgrade before 5k/10k production</span>';
+  const cards=[];
+  cards.push(card('Current Mode',[row('Primary Store',data.current.primary_store),row('Live Location',data.current.live_location_store),row('Dispatch Adapter',data.current.dispatch_adapter),row('PostgreSQL',data.current.postgres_configured?'Configured':'Missing',data.current.postgres_configured),row('Redis',data.current.redis_configured?'Configured':'Missing',data.current.redis_configured)]));
+  cards.push(card('Target Capacity',[row('Registered Drivers',data.target.registered_drivers),row('Active Drivers',data.target.active_drivers),row('Recommendation',data.recommendation)]));
+  cards.push(card('Bridge',[row('PostgreSQL Contract',bridge.postgres.contract.tables.length+' tables',true),row('Redis GEO Contract',bridge.redis.bridge.geo_keys.length+' geo keys',true),row('Bridge OK',bridge.ok?'Yes':'No',bridge.ok)]));
+  cards.push(card('Dispatch Adapter',[row('Current',adapter.current_mode),row('Recommended',adapter.recommended_mode),row('Avoid Full Scan',adapter.settings.avoid_full_table_scan?'Yes':'No',adapter.settings.avoid_full_table_scan)]));
+  document.getElementById('cards').innerHTML=cards.join('');
+  document.getElementById('migrations').innerHTML=mig.status.registry.map(m=>`<span class="pill ${m.applied?'':'warn'}">${m.applied?'✅':'⏳'} ${m.id}</span>`).join('');
+  document.getElementById('commands').textContent=(mig.safe_commands||[]).join('\n');
+  document.getElementById('raw').textContent=JSON.stringify({data,mig,bridge,adapter},null,2);
+}
+load().catch(e=>{document.getElementById('status').innerHTML='<span class="bad">'+e.message+'</span>'});
+</script></body></html>

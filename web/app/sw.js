@@ -1,4 +1,4 @@
-// NEXO Ride cache reset service worker v2-prod-cache-reset-20260707-01
+// NEXO Ride cache reset service worker sprint8j-market-stable-cache-reset
 self.addEventListener('install', event => { self.skipWaiting(); });
 self.addEventListener('activate', event => {
   event.waitUntil((async()=>{

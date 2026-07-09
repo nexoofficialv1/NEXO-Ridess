@@ -1,8 +1,8 @@
 {
-  "name": "nexo-ride-sprint8a-production-deploy-apk-qa-pack",
-  "version": "2.0.8-sprint8a-rc3",
+  "name": "nexo-ride-sprint8k-production-deploy-apk-build-pack",
+  "version": "2.0.14-sprint8k-production-deploy-pack",
   "private": true,
-  "description": "NEXO Ride Sprint-8A Production Deploy Dry Run + APK QA Pack",
+  "description": "NEXO Ride Sprint-8K Production Deploy, Database Migration and APK Build Pack",
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
@@ -65,7 +65,23 @@
     "apk-qa:preflight": "node scripts/apk_qa_preflight.js",
     "real-device-qa:preflight": "node scripts/real_device_qa_preflight.js",
     "pilot-preflight:gate": "node scripts/pilot_preflight_gate.js",
-    "s8a:check": "npm run check && npm run deploy-dry-run:preflight && npm run apk-qa:preflight && npm run real-device-qa:preflight && npm run pilot-preflight:gate && npm run final:smoke"
+    "s8a:check": "npm run check && npm run deploy-dry-run:preflight && npm run apk-qa:preflight && npm run real-device-qa:preflight && npm run pilot-preflight:gate && npm run final:smoke",
+    "s8b:check": "npm run check && npm run final:smoke",
+    "db:migrate:sprint8c": "node scripts/postgres_migrate_sprint8c.js",
+    "s8c:check": "npm run check && node --check scripts/postgres_migrate_sprint8c.js && npm run final:smoke",
+    "s8d:check": "npm run check && npm run final:smoke",
+    "s8e:check": "npm run check && npm run final:smoke",
+    "s8f:check": "npm run check && npm run final:smoke",
+    "s8g:check": "npm run check && npm run final:smoke",
+    "s8h:check": "npm run check && npm run final:smoke",
+    "s8i:check": "npm run check && npm run final:smoke",
+    "market:preflight": "node scripts/market_build_preflight.js",
+    "s8j:check": "npm run check && npm run market:preflight && npm run final:smoke",
+    "deploy:pack8k": "node scripts/production_deploy_pack_8k.js",
+    "termux:push:guide": "node scripts/termux_push_guide_8k.js",
+    "db:migrate:production": "node scripts/postgres_migrate_sprint8c.js",
+    "apk:github:guide": "node scripts/github_apk_build_guide_8k.js",
+    "s8k:check": "npm run check && npm run market:preflight && npm run deploy:pack8k && npm run final:smoke"
   },
   "dependencies": {}
 }

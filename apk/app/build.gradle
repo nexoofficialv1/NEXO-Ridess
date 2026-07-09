@@ -10,8 +10,8 @@ android {
         applicationId 'com.astratechnologies.nexoride'
         minSdk 23
         targetSdk 34
-        versionCode 95
-        versionName '2.0.8A-RC3'
+        versionCode 96
+        versionName '2.0.8B-HOTFIX'
     }
 
     signingConfigs {

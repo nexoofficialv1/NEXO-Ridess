@@ -1,6 +1,6 @@
 // v1.0.53 V54 - VPS deploy pack for ride.nexoofficial.in
 const API='/api';
-const VERSION='2.0-SPRINT7U_BENGALI_ENGLISH_UX_DISTRIBUTION';
+const VERSION='2.0-SPRINT8J_MARKET_STABLE_BUILD';
 const IS_ADMIN_WEB=location.pathname.startsWith('/admin');
 const TOKEN_KEY=IS_ADMIN_WEB?'nexoRideAdminToken':'nexoRideToken';
 if(IS_ADMIN_WEB && !localStorage.getItem('nexoRideLang')) localStorage.setItem('nexoRideLang','bn');
@@ -120,8 +120,9 @@ function googleLoginBlock(isRegister){
   if(isRegister) return '';
   return `<button class="google-login-btn" onclick="startGoogleLogin()"><span class="google-g">G</span><b>${lang==='bn'?'Google দিয়ে যাত্রী লগইন':lang==='hi'?'Google से Passenger Login':'Continue with Google'}</b></button><div class="auth-divider"><span>${lang==='bn'?'অথবা মোবাইল/পাসওয়ার্ড':lang==='hi'?'या मोबाइल/पासवर्ड':'or mobile/password'}</span></div>`;
 }
+function showDemoLoginButton(){return !!(config?.app_mode?.demo_login_visible) || new URL(location.href).searchParams.get('demo')==='1'}
 function setRole(role){roleMode=role;localStorage.setItem('nexoRideRole',role);document.querySelectorAll('.role-tabs button').forEach(b=>b.classList.remove('active'));$('role'+role)?.classList.add('active');$('vehicleFields')?.classList.toggle('hidden',role!=='DRIVER');$('driverHint')?.classList.toggle('hidden',role!=='DRIVER')}
-function authView(mode='login'){const isRegister=mode==='register';app.innerHTML=`<section class="auth-page"><div class="auth-card"><div class="logo-block logo-block-img">${nexoLogo()}</div><button class="lang-mini" onclick="languageView()">🌐 ${lang==='bn'?'বাংলা':lang==='hi'?'हिन्दी':'English'}</button><h1>${isRegister?L('create'):L('welcome')} 👋</h1><p class="subtitle">${L('sub')}</p>${googleLoginBlock(isRegister)}${isRegister?`<div class="role-tabs"><button id="rolePASSENGER" class="active" onclick="setRole('PASSENGER')">👤 ${L('pass')}</button><button id="roleDRIVER" onclick="setRole('DRIVER')">🛺 ${L('drv')}</button></div><div id="driverHint" class="voice-help hidden"><button onclick="speak(L('driverRegHelp'))">🔊 ${L('voice')}</button><span>${L('driverRegHelp')}</span></div>`:''}<label class="input-wrap ${isRegister?'':'hidden'}"><i>👤</i><input id="name" placeholder="${L('name')}"></label><label class="input-wrap"><i>📱</i><input id="login" placeholder="${isRegister?L('mob'):L('loginPh')}" inputmode="tel"></label><label class="input-wrap ${isRegister?'':'hidden'}"><i>✉️</i><input id="email" placeholder="${L('email')}"></label><label class="input-wrap"><i>🔒</i><input id="password" type="password" placeholder="${L('passw')}"></label><div id="vehicleFields" class="hidden form-grid"><label class="input-wrap"><i>🛺</i><input id="vehicleNo" placeholder="${L('veh')}"></label><label class="input-wrap"><i>🪪</i><input id="licenseNo" placeholder="${L('lic')}"></label><label class="input-wrap"><i>🔢</i><input id="aadhaarNo" placeholder="Aadhaar number mandatory" inputmode="numeric"></label><label class="input-wrap"><i>📷</i><input id="driverPhoto" placeholder="Driver photo placeholder"></label><label class="input-wrap"><i>🖼️</i><input id="vehiclePhoto" placeholder="Vehicle photo placeholder"></label></div><label class="consent"><input id="consent" type="checkbox"><span>${L('cons')}</span></label><button class="primary" onclick="${isRegister?'register()':'login()'}">${isRegister?L('reg'):L('login')}</button>${!isRegister?`<button class="switch-link" onclick="forgotPasswordView()">🔑 ${lang==='bn'?'পাসওয়ার্ড ভুলে গেছেন?':lang==='hi'?'पासवर्ड भूल गए?':'Forgot password?'}</button>`:''}<button class="ghost" onclick="authView('${isRegister?'login':'register'}')">${isRegister?L('back'):L('mk')}</button><button class="switch-link" onclick="demoLogin()">${L('demo')}</button><p class="more-note">${L('note')}</p></div></section>`;if(isRegister)setRole(roleMode)}
+function authView(mode='login'){const isRegister=mode==='register';app.innerHTML=`<section class="auth-page"><div class="auth-card"><div class="logo-block logo-block-img">${nexoLogo()}</div><button class="lang-mini" onclick="languageView()">🌐 ${lang==='bn'?'বাংলা':lang==='hi'?'हिन्दी':'English'}</button><h1>${isRegister?L('create'):L('welcome')} 👋</h1><p class="subtitle">${L('sub')}</p>${googleLoginBlock(isRegister)}${isRegister?`<div class="role-tabs"><button id="rolePASSENGER" class="active" onclick="setRole('PASSENGER')">👤 ${L('pass')}</button><button id="roleDRIVER" onclick="setRole('DRIVER')">🛺 ${L('drv')}</button></div><div id="driverHint" class="voice-help hidden"><button onclick="speak(L('driverRegHelp'))">🔊 ${L('voice')}</button><span>${L('driverRegHelp')}</span></div>`:''}<label class="input-wrap ${isRegister?'':'hidden'}"><i>👤</i><input id="name" placeholder="${L('name')}"></label><label class="input-wrap"><i>📱</i><input id="login" placeholder="${isRegister?L('mob'):L('loginPh')}" inputmode="tel"></label><label class="input-wrap ${isRegister?'':'hidden'}"><i>✉️</i><input id="email" placeholder="${L('email')}"></label><label class="input-wrap"><i>🔒</i><input id="password" type="password" placeholder="${L('passw')}"></label><div id="vehicleFields" class="hidden form-grid"><label class="input-wrap"><i>🛺</i><input id="vehicleNo" placeholder="${L('veh')}"></label><label class="input-wrap"><i>🪪</i><input id="licenseNo" placeholder="${L('lic')}"></label><label class="input-wrap"><i>🔢</i><input id="aadhaarNo" placeholder="Aadhaar number mandatory" inputmode="numeric"></label><label class="input-wrap"><i>📷</i><input id="driverPhoto" placeholder="Driver photo placeholder"></label><label class="input-wrap"><i>🖼️</i><input id="vehiclePhoto" placeholder="Vehicle photo placeholder"></label></div><label class="consent"><input id="consent" type="checkbox"><span>${L('cons')}</span></label><button class="primary" onclick="${isRegister?'register()':'login()'}">${isRegister?L('reg'):L('login')}</button>${!isRegister?`<button class="switch-link" onclick="forgotPasswordView()">🔑 ${lang==='bn'?'পাসওয়ার্ড ভুলে গেছেন?':lang==='hi'?'पासवर्ड भूल गए?':'Forgot password?'}</button>`:''}<button class="ghost" onclick="authView('${isRegister?'login':'register'}')">${isRegister?L('back'):L('mk')}</button>${showDemoLoginButton()?`<button class="switch-link" onclick="demoLogin()">${L('demo')}</button>`:''}<p class="more-note">${L('note')}</p></div></section>`;if(isRegister)setRole(roleMode)}
 
 function forgotPasswordView(){const title=lang==='bn'?'পাসওয়ার্ড রিসেট':lang==='hi'?'पासवर्ड रीसेट':'Reset Password';const sub=lang==='bn'?'মোবাইল / ইমেল / NEXO ID দিন, OTP যাচাই করে নতুন পাসওয়ার্ড সেট করুন।':lang==='hi'?'मोबाइल / ईमेल / NEXO ID दें, OTP से नया पासवर्ड सेट करें।':'Enter mobile / email / NEXO ID, verify OTP and set a new password.';app.innerHTML=`<section class="auth-page"><div class="auth-card"><div class="logo-block logo-block-img">${nexoLogo()}</div><button class="lang-mini" onclick="languageView()">🌐 ${lang==='bn'?'বাংলা':lang==='hi'?'हिन्दी':'English'}</button><h1>${title} 🔑</h1><p class="subtitle">${sub}</p><label class="input-wrap"><i>📱</i><input id="resetLogin" placeholder="${L('loginPh')}"></label><button class="primary" onclick="requestResetOtp()">${lang==='bn'?'OTP পাঠান':lang==='hi'?'OTP भेजें':'Send OTP'}</button><div id="resetOtpBox" class="hidden"><label class="input-wrap"><i>🔢</i><input id="resetOtp" placeholder="OTP" inputmode="numeric"></label><label class="input-wrap"><i>🔒</i><input id="newPassword" type="password" placeholder="${lang==='bn'?'নতুন পাসওয়ার্ড':lang==='hi'?'नया पासवर्ड':'New password'}"></label><button class="primary" onclick="resetPassword()">${lang==='bn'?'পাসওয়ার্ড বদলান':lang==='hi'?'पासवर्ड बदलें':'Reset Password'}</button></div><button class="ghost" onclick="authView('login')">${L('back')}</button><p id="resetNote" class="more-note">${lang==='bn'?'Testing mode হলে OTP 123456 হতে পারে।':lang==='hi'?'Testing mode में OTP 123456 हो सकता है।':'In testing mode OTP may be 123456.'}</p></div></section>`}
 async function requestResetOtp(){try{const login=$('resetLogin').value.trim();if(!login)return toast(L('loginPh'));const r=await api('/auth/forgot-password',{method:'POST',body:{login}});$('resetOtpBox')?.classList.remove('hidden');$('resetNote').innerText=(r.demo_code?('Testing OTP: '+r.demo_code+' · '):'')+'OTP sent to '+(r.mobile_mask||'registered mobile');toast('OTP sent')}catch(e){toast(e.message)}}
@@ -2303,3 +2304,697 @@ try{
   const __s7jPassengerHome = passengerHome;
   passengerHome = function(){ __s7jPassengerHome(); const wrap=document.querySelector('.shell .content')||document.querySelector('#app'); if(wrap) wrap.insertAdjacentHTML('afterbegin', nexoSprint7JReleaseCard()); };
 }catch(e){}
+
+/* Sprint-8B Public App UX Hotfix
+   - Hide internal QA cards from passenger home
+   - Public passenger home only
+   - Back button state handling in APK/WebView
+   - Current GPS pickup button + visible suggestions in booking sheet
+*/
+try{ window.NEXO_RIDE_SPRINT8B_PUBLIC_UX_HOTFIX=true; }catch(e){}
+
+function nexoSetTab(tab){ try{ currentTab=tab; render(); }catch(e){ showAppError(e); } }
+
+function nexoSuggestionItems(q){
+  try{
+    const raw = (config?.service_area?.points || points() || []).map(x=>String(x?.name||x||'')).filter(Boolean);
+    const uniq=[...new Set(raw)];
+    const s=String(q||'').toLowerCase().trim();
+    const list=s?uniq.filter(p=>p.toLowerCase().includes(s)):uniq;
+    return list.slice(0,8);
+  }catch(e){ return []; }
+}
+function nexoRenderSuggestionBox(type){
+  try{
+    const input=$(type); const box=$('sugg_'+type); if(!input||!box)return;
+    const list=nexoSuggestionItems(input.value);
+    box.innerHTML=list.map(p=>`<button type="button" class="place-chip" onclick="setPoint('${type}', '${esc(String(p)).replace(/'/g,'&#39;')}'); nexoRenderSuggestionBox('${type}')">📍 ${esc(p)}</button>`).join('') || '<small class="muted">কোন suggestion নেই</small>';
+  }catch(e){}
+}
+async function nexoUseCurrentPickup(){
+  try{
+    toast('Current location নেওয়া হচ্ছে... Location permission Allow করুন');
+    const g=await nexoStrictGpsLocation();
+    let name=`My Location ${Number(g.lat).toFixed(5)}, ${Number(g.lng).toFixed(5)}`;
+    try{ const rev=await api(`/maps/reverse?lat=${encodeURIComponent(g.lat)}&lng=${encodeURIComponent(g.lng)}&limit=5`); if(rev.nearest?.name) name=`${rev.nearest.name} · GPS ${Number(g.lat).toFixed(5)},${Number(g.lng).toFixed(5)}`; }catch(_e){}
+    booking.pickup=name; booking.pickup_lat=g.lat; booking.pickup_lng=g.lng; booking.lat=g.lat; booking.lng=g.lng;
+    if($('pickup')) $('pickup').value=name;
+    const map=$('pickupGeoMap');
+    if(map) map.innerHTML=`<div class="driver-gps-line"><b>📍 Current pickup set</b><span>${esc(name)}</span></div><a class="ghost" style="display:block;text-align:center;text-decoration:none;margin-top:8px" target="_blank" href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(g.lat+','+g.lng)}">Google Map-এ দেখুন</a>`;
+    toast('Pickup current location set হয়েছে');
+    nexoRenderSuggestionBox('pickup');
+  }catch(e){ toast(e.message||'Location পাওয়া যায়নি'); }
+}
+
+function bookingStepHtml(){
+  if(booking.step===1)return `<h3>${L('step1')}</h3><button class="primary" onclick="nexoUseCurrentPickup()">📍 আমার বর্তমান লোকেশন নিন</button><div id="pickupGeoMap" class="ok" style="margin:10px 0">GPS দিলে pickup এখানে দেখাবে।</div><input class="big-input" id="pickup" value="${esc(booking.pickup)}" oninput="booking.pickup=this.value; nexoRenderSuggestionBox('pickup')" onfocus="nexoRenderSuggestionBox('pickup')" placeholder="${L('selPick')}"><div id="sugg_pickup" class="place-grid"></div><div class="place-grid">${pointChips('pickup')}</div><button class="primary" onclick="saveStep1()">${L('next')}</button>`;
+  if(booking.step===2)return `<h3>${L('step2')}</h3><input class="big-input" id="drop" value="${esc(booking.drop)}" oninput="booking.drop=this.value; nexoRenderSuggestionBox('drop')" onfocus="nexoRenderSuggestionBox('drop')" placeholder="${L('selDrop')}"><div id="sugg_drop" class="place-grid"></div><div class="place-grid">${pointChips('drop')}</div><div class="two-btn"><button class="ghost" onclick="booking.step=1;refreshBookingStep()">${L('prev')}</button><button class="primary" onclick="saveStep2()">${L('next')}</button></div>`;
+  return `<h3>${L('step3')}</h3><div class="summary route-summary"><div><b>${esc(booking.pickup||'-')}</b><span>${L('pickup')}</span></div><div><b>→</b><span></span></div><div><b>${esc(booking.drop||'-')}</b><span>${L('drop')}</span></div></div><div class="segment"><button id="fullBtn" class="${activeRideType==='FULL'?'active':''}" onclick="setRideType('FULL')">${L('full')}</button><button id="sharingBtn" class="${activeRideType==='SHARING'?'active':''}" onclick="setRideType('SHARING')">${L('sharing')}</button></div><div id="seatBox" class="seat-box ${activeRideType==='SHARING'?'':'hidden'}"><b>সিট</b>${[1,2,3,4].map(n=>`<button class="${activeSeats===n?'active':''}" onclick="setSeats(${n})">${n}</button>`).join('')}</div><div id="routeRealMap" class="route-preview-card"><div class="driver-gps-line"><b>Route Preview</b><span>Fare Estimate চাপলে route/ভাড়া দেখাবে।</span></div></div><div id="fareBox" class="ok hidden"></div><button class="ghost" onclick="estimateFare()">₹ ${L('est')}</button><div class="two-btn"><button class="ghost" onclick="booking.step=2;refreshBookingStep()">${L('prev')}</button><button class="primary" onclick="requestRide()">🛺 ${L('confirm')}</button></div>`;
+}
+function refreshBookingStep(){ const c=$('stepContent'); if(c)c.innerHTML=bookingStepHtml(); document.querySelectorAll('.step-dots span').forEach((s,i)=>s.classList.toggle('on',i+1===booking.step)); setTimeout(()=>{nexoRenderSuggestionBox('pickup');nexoRenderSuggestionBox('drop');},50); }
+function setPoint(target,val){ booking[target]=String(val||''); if($(target))$(target).value=booking[target]; nexoRenderSuggestionBox(target); }
+async function requestRide(){try{if(!booking.pickup||!booking.drop)return toast(L('selectFirst'));let g={};try{g=booking.pickup_lat&&booking.pickup_lng?{lat:booking.pickup_lat,lng:booking.pickup_lng,pickup_lat:booking.pickup_lat,pickup_lng:booking.pickup_lng}:await getDeviceLocation(booking.pickup)}catch(_e){}const r=await api('/rides',{method:'POST',body:{pickup:booking.pickup,drop:booking.drop,ride_type:activeRideType,seats:activeSeats,...g}});closeSheet();toast(`${L('requested')}. ${L('near')}: ${r.ride.nearby_driver_count}`);currentTab='rides';render()}catch(e){toast(e.message)}}
+
+function passengerHome(){
+  shell(`<section class="hero-card hero-logo-card public-passenger-home"><div class="hero-mini-brand">${nexoIcon('hero-icon')}<span class="glow-chip">NEXO Ride</span></div><div><h2>কোথায় যাবেন?</h2><p>Account থাকলেও / না থাকলেও Toto booking করা যাবে। Pickup location দিয়ে driver খুঁজুন।</p></div><button class="primary" onclick="openBookingSheet()">🛺 Book Ride</button></section><section class="card"><div class="section-title"><h2>Passenger Quick Actions</h2><button>Public</button></div><div class="grid">${tile('🛺','Book Ride','Pickup + Drop + Fare','openBookingSheet()')}${tile('▣','QR Scanner','QR scan করে booking',"nexoNativeOpen('qr')")} ${tile('🎫','Guest Ride Status','Token দিয়ে status দেখুন',"location.href='/guest-ride/?native=1'")} ${tile('🆘','Safety / SOS','Ride চলাকালীন safety','currentTab=\'rides\';render()')}</div></section><section class="summary"><div><b>GPS</b><span>Pickup</span></div><div><b>Map</b><span>Drop Search</span></div><div><b>OTP</b><span>Ride Start</span></div></section><section class="card"><div class="section-title"><h2>${L('popular')}</h2><button>Kalna</button></div><div class="list">${points().slice(0,8).map(p=>`<div class="row" onclick="openBookingSheet('${esc(p)}')"><i>📍</i><div><b>${esc(p)}</b><span>${L('tap')}</span></div><em>›</em></div>`).join('')}</div></section>${bookingSheetHtml()}`);
+}
+try{ nexoNativeStatusCard=function(){return ''}; nexoSprint7JReleaseCard=function(){return ''}; }catch(e){}
+
+try{
+  const __s8bRender=render; let __lastTab=currentTab||'home';
+  render=async function(){
+    const r=await __s8bRender();
+    try{ document.querySelectorAll('.s7j-release-card,.native-apk-card').forEach(el=>{ if(!el.closest('.driver-live-hero')) el.remove(); }); }catch(_e){}
+    try{ if(currentTab!==__lastTab){ __lastTab=currentTab; history.pushState({nexoTab:currentTab},'',location.pathname+location.search+'#'+currentTab); } }catch(_e){}
+    return r;
+  };
+  window.addEventListener('popstate', function(ev){
+    try{
+      if(currentTab && currentTab!=='home'){ currentTab='home'; history.pushState({nexoTab:'home'},'',location.pathname+location.search+'#home'); render(); }
+      else { history.pushState({nexoTab:'home'},'',location.pathname+location.search+'#home'); toast('Logout করতে Logout button চাপুন'); }
+    }catch(e){}
+  });
+}catch(e){}
+
+
+// ===============================================================
+// Sprint-8C Final Booking UX Patch
+// NEXO premium map-first booking flow: Pickup -> Drop -> Route -> Driver search -> Pay -> Confirm -> OTP -> Reached -> Rating
+// ===============================================================
+try { window.NEXO_RIDE_SPRINT8C_FINAL_BOOKING_UX = true; } catch(e) {}
+let nexo8cRouteCache = null;
+let nexo8cDriverSearchTimer = null;
+let nexo8cSearchProgress = 0;
+let nexo8cPaymentMethod = 'CASH';
+
+function nexo8cCleanPlace(v){ return String(v||'').replace(/\s*-?\d{1,2}\.\d+\s*,\s*\d{2,3}\.\d+\s*$/,'').trim(); }
+function nexo8cCanContinue(){ return !!(String(booking.pickup||'').trim() && String(booking.drop||'').trim()); }
+function nexo8cStepLabel(){
+  if(!booking.pickup) return 'Pickup location set করুন';
+  if(!booking.drop) return 'Drop location set করুন';
+  return 'Route, fare ও driver search ready';
+}
+function nexo8cTimeline(status){
+  const steps=[['pickup','Pickup'],['drop','Drop'],['route','Route'],['driver','Driver'],['pay','Pay'],['otp','OTP'],['done','Reached']];
+  const map={pickup:0,drop:1,route:2,driver:3,pay:4,otp:5,done:6};
+  const idx=map[status] ?? (booking.drop?2:booking.pickup?1:0);
+  return `<div class="nexo8c-timeline">${steps.map((s,i)=>`<span class="${i<=idx?'on':''}"><i>${i+1}</i><b>${s[1]}</b></span>`).join('')}</div>`;
+}
+async function nexo8cRoute(){
+  if(!nexo8cCanContinue()) return null;
+  try{ nexo8cRouteCache = await resolveRoutePreview(); return nexo8cRouteCache; }
+  catch(e){ console.warn('Sprint8C route fallback',e); const p=getDemoCoords(booking.pickup), d=getDemoCoords(booking.drop); const km=Math.max(1, Math.round((Math.abs(p.lat-d.lat)+Math.abs(p.lng-d.lng))*111*10)/10); nexo8cRouteCache={pickup:booking.pickup,drop:booking.drop,pickup_coords:p,drop_coords:d,distance_km:km,eta_minutes:Math.max(6,Math.round(km*4)),fare:{estimated_fare:Math.max(40,Math.round(30+km*12)),base_fare:40,ride_type:activeRideType},geofence:{inside:true,message:'Local fallback route'},navigation_links:{google_web:`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(booking.drop)}`}}; return nexo8cRouteCache; }
+}
+async function nexo8cRenderRoutePreview(){
+  const box=$('nexo8cRoutePreview'); if(!box) return;
+  if(!booking.pickup){ box.innerHTML=`<div class="nexo8c-hint">📍 প্রথমে pickup location দিন। Current GPS বা search suggestion ব্যবহার করতে পারবেন।</div>`; return; }
+  if(!booking.drop){ box.innerHTML=`<div class="nexo8c-hint">🏁 Pickup fixed হয়েছে। এবার drop location দিন, তারপর map-এর মধ্যে route দেখা যাবে।</div>`; return; }
+  box.innerHTML=`<div class="nexo8c-hint shimmer">🗺️ Route এবং fare calculate হচ্ছে...</div>`;
+  const rt=await nexo8cRoute(); const fare=rt.fare||{};
+  box.innerHTML=`<div class="nexo8c-route-card">
+    <div class="nexo8c-map-wrap" id="nexo8cRealRouteMap">${inAppMapHtml(rt,'route')}</div>
+    <div class="route-line nexo8c-route-line"><span>📍 ${esc(nexo8cCleanPlace(rt.pickup||booking.pickup))}</span><i></i><span>🏁 ${esc(nexo8cCleanPlace(rt.drop||booking.drop))}</span></div>
+    <div class="route-grid nexo8c-route-grid"><div><b>${rt.distance_km||'-'} km</b><small>Route</small></div><div><b>${rt.eta_minutes||'-'} min</b><small>ETA</small></div><div><b>₹${fare.estimated_fare||rt.estimated_fare||'-'}</b><small>Fare</small></div></div>
+    <div class="nexo8c-flow-note">Pickup + Drop দুটো fixed হলেই driver search page active হবে।</div>
+  </div>`;
+  try{ await renderRealOrFallbackMap($('nexo8cRealRouteMap'),rt,{mode:'route'}); }catch(e){}
+}
+function nexo8cPlaceInput(type){
+  const icon=type==='pickup'?'📍':'🏁', label=type==='pickup'?'Pickup':'Drop', ph=type==='pickup'?'Pickup search করুন / Current GPS':'Drop search করুন / Map pin';
+  const val=esc(booking[type]||'');
+  return `<div class="nexo8c-input-block ${type}"><label>${icon} ${label}</label><div class="nexo8c-input-row"><input id="${type}" value="${val}" oninput="booking.${type}=this.value;nexo8cRouteCache=null;searchPlaceTyping('${type}',this.value);nexo8cRenderRoutePreview();" placeholder="${ph}"><button onclick="mapPickerModal('${type}')">Map</button></div><div id="${type}Suggestions" class="place-suggestions nexo8c-suggestions"></div>${type==='pickup'?`<button class="ghost nexo8c-wide" onclick="selectCurrentPickup();setTimeout(nexo8cRenderRoutePreview,250)">📡 Use My Current Location</button>`:''}</div>`;
+}
+function bookingStepHtml(){
+  const places = (typeof __nexoKnownLocalPlaces==='function'?__nexoKnownLocalPlaces():points().map(p=>({name:p}))).slice(0,10);
+  const chips=places.map(p=>`<button type="button" onclick="selectSuggestedPlace(booking.pickup?'drop':'pickup','${esc(p.name)}');setTimeout(()=>{refreshBookingStep();nexo8cRenderRoutePreview();},120)">${esc(p.name)}</button>`).join('');
+  return `<div class="booking-enhanced nexo8c-booking">
+    ${nexo8cTimeline(booking.drop?'route':booking.pickup?'drop':'pickup')}
+    <div class="nexo8c-sheet-head"><h3>${nexo8cStepLabel()}</h3><p>Map-এর ভিতরেই pickup/drop pin, route line, ETA এবং fare preview দেখাবে।</p></div>
+    ${nexo8cPlaceInput('pickup')}
+    ${nexo8cPlaceInput('drop')}
+    <div class="nexo8c-chip-title">Popular places</div><div class="place-chips nexo8c-chips">${chips}</div>
+    <div id="nexo8cRoutePreview" class="nexo8c-preview"><div class="nexo8c-hint">Pickup দিলে drop চাইবে; pickup + drop হলে route দেখাবে।</div></div>
+    <button class="primary nexo8c-continue" ${nexo8cCanContinue()?'':'disabled'} onclick="nexo8cOpenDriverSearch()">${nexo8cCanContinue()?'Driver Search করুন':'Pickup ও Drop set করুন'}</button>
+  </div>`;
+}
+async function refreshBookingStep(){
+  const el=$('stepContent'); if(!el) return;
+  el.innerHTML=bookingStepHtml();
+  setTimeout(nexo8cRenderRoutePreview,80);
+}
+async function openBookingSheet(startPickup=''){
+  if(startPickup){ booking.pickup=startPickup; booking.step=2; } else { booking.step=booking.pickup?2:1; }
+  $('overlay')?.classList.add('show'); $('bookSheet')?.classList.add('show');
+  await refreshBookingStep();
+}
+function nexo8cOpenDriverSearch(){
+  if(!nexo8cCanContinue()) return toast('Pickup এবং Drop দুটো লাগবে');
+  const sheet=$('bookSheet'); if(!sheet) return;
+  nexo8cSearchProgress=0;
+  sheet.innerHTML=`<div class="handle"></div><div class="section-title"><h2>Searching Driver</h2><button onclick="closeSheet()">Cancel</button></div><div id="nexo8cDriverSearchBox" class="nexo8c-driver-search"></div>`;
+  nexo8cDriverSearchTick();
+}
+async function nexo8cDriverSearchTick(){
+  const box=$('nexo8cDriverSearchBox'); if(!box) return;
+  nexo8cSearchProgress=Math.min(100,nexo8cSearchProgress+20);
+  const rt=await nexo8cRoute(); const fare=rt?.fare||{};
+  box.innerHTML=`${nexo8cTimeline('driver')}<div class="nexo8c-pulse"><span></span><i>🛺</i></div><h3>Nearby driver খোঁজা হচ্ছে...</h3><p>${esc(nexo8cCleanPlace(booking.pickup))} → ${esc(nexo8cCleanPlace(booking.drop))}</p><div class="nexo8c-progress"><i style="width:${nexo8cSearchProgress}%"></i></div><div class="route-grid nexo8c-route-grid"><div><b>${rt?.distance_km||'-'} km</b><small>Route</small></div><div><b>${rt?.eta_minutes||'-'} min</b><small>ETA</small></div><div><b>₹${fare.estimated_fare||'-'}</b><small>Fare</small></div></div>`;
+  clearTimeout(nexo8cDriverSearchTimer);
+  if(nexo8cSearchProgress<100) nexo8cDriverSearchTimer=setTimeout(nexo8cDriverSearchTick,520);
+  else setTimeout(nexo8cDriverFound,350);
+}
+async function nexo8cDriverFound(){
+  const box=$('nexo8cDriverSearchBox'); if(!box) return;
+  const rt=await nexo8cRoute(); const fare=rt?.fare||{};
+  box.innerHTML=`${nexo8cTimeline('pay')}<div class="nexo8c-driver-card"><div class="avatar">🛺</div><div><h3>Driver Found</h3><p>Nearby NEXO driver assigned হবে payment confirmation-এর পরে।</p><b>ETA ${rt?.eta_minutes||'-'} min · Fare ₹${fare.estimated_fare||'-'}</b></div></div><div class="nexo8c-pay-box"><h3>Pay & Confirm</h3><button class="${nexo8cPaymentMethod==='CASH'?'active':''}" onclick="nexo8cPaymentMethod='CASH';nexo8cDriverFound()">Cash</button><button class="${nexo8cPaymentMethod==='UPI'?'active':''}" onclick="nexo8cPaymentMethod='UPI';nexo8cDriverFound()">UPI / QR</button></div><button class="primary nexo8c-continue" onclick="nexo8cConfirmPaidBooking()">Pay করে Booking Confirm করুন</button><button class="ghost nexo8c-wide" onclick="refreshBookingStep()">Location বদলান</button>`;
+}
+async function nexo8cConfirmPaidBooking(){
+  try{
+    if(!nexo8cCanContinue()) return toast('Pickup এবং Drop দুটো লাগবে');
+    const rt=await nexo8cRoute();
+    let g={};try{g=booking.pickup_lat&&booking.pickup_lng?{lat:booking.pickup_lat,lng:booking.pickup_lng,pickup_lat:booking.pickup_lat,pickup_lng:booking.pickup_lng}:await getDeviceLocation(booking.pickup)}catch(_e){}
+    const body={pickup:booking.pickup,drop:booking.drop,ride_type:activeRideType,seats:activeSeats,payment_method:nexo8cPaymentMethod,payment_status:nexo8cPaymentMethod==='CASH'?'PENDING_CASH':'PAID_DEMO',distance_km:rt?.distance_km,estimated_fare:rt?.fare?.estimated_fare||rt?.estimated_fare,...g};
+    const r=await api('/rides',{method:'POST',body});
+    closeSheet(); toast(`Booking confirmed. Driver notification যাবে। OTP: ${r.ride?.ride_otp||'generated'}`);
+    currentTab='rides'; render();
+  }catch(e){toast(e.message)}
+}
+async function requestRide(){ return nexo8cConfirmPaidBooking(); }
+
+// Better Android back handling inside app shell/sheets
+try{
+  window.addEventListener('popstate',()=>{ const sheet=$('bookSheet'); if(sheet&&sheet.classList.contains('show')){ closeSheet(); history.pushState({nexo:'home'},''); } });
+  if(history && history.state==null) history.replaceState({nexo:'home'},'');
+}catch(e){}
+
+// ===============================================================
+// Sprint-8D Real Driver Search + Payment Gate + Reached Feedback Polish
+// This patch replaces Sprint-8C demo driver-found flow with actual ride request polling.
+// Flow: Pickup + Drop -> create ride REQUESTED -> poll for DRIVER_ACCEPTED -> Pay -> CONFIRMED OTP -> Driver pickup/start/complete -> Rating/Suggestion.
+// ===============================================================
+try { window.NEXO_RIDE_SPRINT8D_REAL_DRIVER_PAYMENT_FLOW = true; } catch(e) {}
+let nexo8dActiveRideId = null;
+let nexo8dPollTimer = null;
+let nexo8dPollCount = 0;
+let nexo8dLastRide = null;
+
+function nexo8dStopPoll(){ try{ clearTimeout(nexo8dPollTimer); }catch(e){} nexo8dPollTimer=null; }
+function nexo8dRideStatusNice(s){
+  s=String(s||'').toUpperCase();
+  return ({REQUESTED:'Searching driver',DRIVER_ACCEPTED:'Driver found',CONFIRMED:'Booking confirmed',ARRIVED:'Driver at pickup',STARTED:'Ride started',DRIVER_REACHED_DROP:'Reached destination',COMPLETED:'Reached destination',CANCELLED:'Cancelled',PAYMENT_TIMEOUT:'Payment timeout'})[s]||s;
+}
+function nexo8dDriverCard(r){
+  const name=r?.driver_name||'NEXO Driver';
+  const veh=r?.driver_vehicle_no||'Toto';
+  const rating=r?.driver_rating||r?.rating||'5.0';
+  return `<div class="nexo8d-driver-card"><div class="nexo8d-driver-avatar">🛺</div><div><h3>${esc(name)}</h3><p>${esc(veh)} · ${rating}⭐ · OTP safe ride</p><b>${esc(nexo8dRideStatusNice(r?.status))}</b></div><button class="ghost" onclick="currentTab='notifications';render()">Alerts</button></div>`;
+}
+async function nexo8dCreateRideRequest(){
+  if(nexo8dActiveRideId) return nexo8dActiveRideId;
+  const rt=await nexo8cRoute();
+  let g={};
+  try{ g=booking.pickup_lat&&booking.pickup_lng?{lat:booking.pickup_lat,lng:booking.pickup_lng,pickup_lat:booking.pickup_lat,pickup_lng:booking.pickup_lng}:await getDeviceLocation(booking.pickup); }catch(_e){}
+  const body={pickup:booking.pickup,drop:booking.drop,ride_type:activeRideType,seats:activeSeats,distance_km:rt?.distance_km,estimated_fare:rt?.fare?.estimated_fare||rt?.estimated_fare,...g};
+  const res=await api('/rides',{method:'POST',body});
+  nexo8dActiveRideId=res.ride?.id;
+  nexo8dLastRide=res.ride;
+  return nexo8dActiveRideId;
+}
+async function nexo8dFetchActiveRide(){
+  const r=await api('/rides?role=PASSENGER&t='+Date.now());
+  const rides=r.rides||[];
+  return rides.find(x=>x.id===nexo8dActiveRideId) || rides.find(x=>['REQUESTED','DRIVER_ACCEPTED','CONFIRMED','ARRIVED','STARTED','DRIVER_REACHED_DROP','COMPLETED'].includes(String(x.status||'').toUpperCase())) || rides[0] || null;
+}
+function nexo8dSearchSkeleton(r){
+  const status=String(r?.status||'REQUESTED').toUpperCase();
+  const pct=status==='REQUESTED'?Math.min(95,20+nexo8dPollCount*9):100;
+  const count=r?.nearby_driver_count||r?.candidate_count||'';
+  return `${nexo8cTimeline(status==='REQUESTED'?'driver':status==='DRIVER_ACCEPTED'?'pay':status==='CONFIRMED'?'otp':status==='COMPLETED'?'done':'driver')}
+    <div class="nexo8c-pulse nexo8d-live-pulse"><span></span><i>${status==='REQUESTED'?'🛺':'✅'}</i></div>
+    <h3>${status==='REQUESTED'?'Nearby driver খোঁজা হচ্ছে...':esc(nexo8dRideStatusNice(status))}</h3>
+    <p>${esc(nexo8cCleanPlace(booking.pickup))} → ${esc(nexo8cCleanPlace(booking.drop))}</p>
+    <div class="nexo8c-progress"><i style="width:${pct}%"></i></div>
+    <div class="nexo8d-search-note">${status==='REQUESTED'?`${count?count+' জন ':''}online driver-কে request পাঠানো হয়েছে। Driver accept করলেই Pay option আসবে।`:'Driver response received.'}</div>`;
+}
+async function nexo8dPollDriver(){
+  const box=$('nexo8cDriverSearchBox'); if(!box) return;
+  nexo8dPollCount++;
+  try{
+    const ride=await nexo8dFetchActiveRide();
+    if(ride){ nexo8dLastRide=ride; nexo8dActiveRideId=ride.id; }
+    const status=String(ride?.status||'REQUESTED').toUpperCase();
+    if(status==='DRIVER_ACCEPTED') return nexo8dShowPayment(ride);
+    if(status==='CONFIRMED' || status==='ARRIVED' || status==='STARTED') return nexo8dShowConfirmed(ride);
+    if(status==='COMPLETED' || status==='DRIVER_REACHED_DROP') return nexo8dShowReached(ride);
+    if(['CANCELLED','PAYMENT_TIMEOUT'].includes(status)){
+      box.innerHTML=`${nexo8cTimeline('driver')}<div class="alert">${esc(nexo8dRideStatusNice(status))}. আবার booking করুন।</div><button class="primary nexo8c-continue" onclick="nexo8dResetBooking()">New Booking</button>`;
+      return;
+    }
+    box.innerHTML=nexo8dSearchSkeleton(ride);
+  }catch(e){ box.innerHTML=`<div class="alert">${esc(e.message)}</div><button class="ghost nexo8c-wide" onclick="nexo8dPollDriver()">Retry</button>`; }
+  nexo8dStopPoll();
+  nexo8dPollTimer=setTimeout(nexo8dPollDriver,3500);
+}
+function nexo8dOpenDriverSearch(){
+  if(!nexo8cCanContinue()) return toast('Pickup এবং Drop দুটো লাগবে');
+  const sheet=$('bookSheet'); if(!sheet) return;
+  nexo8dStopPoll(); nexo8dActiveRideId=null; nexo8dPollCount=0; nexo8dLastRide=null;
+  sheet.innerHTML=`<div class="handle"></div><div class="section-title"><h2>Searching Driver</h2><button onclick="nexo8dCancelSearch()">Cancel</button></div><div id="nexo8cDriverSearchBox" class="nexo8c-driver-search"></div>`;
+  const box=$('nexo8cDriverSearchBox');
+  box.innerHTML=`${nexo8cTimeline('driver')}<div class="nexo8c-pulse nexo8d-live-pulse"><span></span><i>🛺</i></div><h3>Ride request তৈরি হচ্ছে...</h3><p>Pickup/Drop route lock করা হচ্ছে।</p>`;
+  nexo8dCreateRideRequest().then(()=>nexo8dPollDriver()).catch(e=>{box.innerHTML=`<div class="alert">${esc(e.message)}</div><button class="ghost nexo8c-wide" onclick="refreshBookingStep()">Back</button>`});
+}
+function nexo8dCancelSearch(){ nexo8dStopPoll(); closeSheet(); toast('Driver search screen closed'); }
+function nexo8dShowPayment(ride){
+  nexo8dStopPoll();
+  const box=$('nexo8cDriverSearchBox'); if(!box) return;
+  const fare=ride?.estimated_fare || nexo8cRouteCache?.fare?.estimated_fare || '-';
+  box.innerHTML=`${nexo8cTimeline('pay')}${nexo8dDriverCard(ride)}
+  <div class="nexo8c-pay-box nexo8d-pay-box"><h3>Pay option</h3><p>Driver পাওয়া গেছে। Payment success হলেই booking confirm হবে এবং OTP generate হবে।</p><button class="${nexo8cPaymentMethod==='UPI'?'active':''}" onclick="nexo8cPaymentMethod='UPI';nexo8dShowPayment(nexo8dLastRide)">UPI / QR</button><button class="${nexo8cPaymentMethod==='CASH'?'active':''}" onclick="nexo8cPaymentMethod='CASH';nexo8dShowPayment(nexo8dLastRide)">Cash approval</button></div>
+  <div class="route-grid nexo8c-route-grid"><div><b>₹${fare}</b><small>Payable</small></div><div><b>${ride?.payment_hold_seconds||180}s</b><small>Hold</small></div><div><b>${esc(ride?.ride_type||activeRideType)}</b><small>Type</small></div></div>
+  <button class="primary nexo8c-continue" onclick="nexo8dPayAndConfirm('${ride.id}')">Pay করে Booking Confirm করুন</button>`;
+}
+async function nexo8dPayAndConfirm(id){
+  const box=$('nexo8cDriverSearchBox'); if(box) box.innerHTML=`${nexo8cTimeline('pay')}<div class="nexo8c-hint shimmer">💳 Payment verify হচ্ছে...</div>`;
+  try{
+    const p=await api('/payments/create-order',{method:'POST',body:{ride_id:id}});
+    let ref='NEXO-'+Date.now();
+    if(p.payment?.provider==='MANUAL_QR') ref=prompt(`UPI payment reference দিন\nUPI: ${p.payment.manual_upi_id||'not set'}`,ref)||ref;
+    else if(p.payment?.provider==='RAZORPAY') ref=prompt('Razorpay payment id / UPI reference দিন',ref)||ref;
+    else if(nexo8cPaymentMethod==='CASH') ref='CASH-AUTH-'+Date.now();
+    const out=await api(`/payments/${p.order.id}/verify`,{method:'POST',body:{transaction_id:ref,payment_method:nexo8cPaymentMethod==='CASH'?'CASH_AUTH':'UPI_DEMO'}});
+    nexo8dLastRide=out.ride; nexo8dShowConfirmed(out.ride);
+  }catch(e){ if(box) box.innerHTML=`<div class="alert">${esc(e.message)}</div><button class="ghost nexo8c-wide" onclick="nexo8dShowPayment(nexo8dLastRide)">Try Again</button>`; }
+}
+function nexo8dShowConfirmed(ride){
+  nexo8dStopPoll();
+  const box=$('nexo8cDriverSearchBox'); if(!box) return;
+  box.innerHTML=`${nexo8cTimeline('otp')}<div class="nexo8d-confirmed"><div class="ok">✅ Booking Confirmed</div>${nexo8dDriverCard(ride)}<div class="nexo8d-otp-box"><span>Passenger OTP</span><b>${esc(ride?.ride_otp||'----')}</b><small>Driver pickup point-এ এলে এই OTP বলবেন। OTP ছাড়া ride start হবে না।</small></div><button class="primary nexo8c-continue" onclick="closeSheet();currentTab='rides';render()">Track Ride</button></div>`;
+}
+function nexo8dShowReached(ride){
+  nexo8dStopPoll();
+  const box=$('nexo8cDriverSearchBox'); if(!box) return;
+  box.innerHTML=`${nexo8cTimeline('done')}<div class="nexo8d-confirmed"><div class="ok">🏁 Destination Reached</div><p>Reached notification click করলে rating এবং suggestion box খুলবে।</p><button class="primary nexo8c-continue" onclick="closeSheet();rateRide('${ride.id}')">⭐ Rating / Suggestion দিন</button></div>`;
+}
+function nexo8dResetBooking(){ nexo8dStopPoll(); nexo8dActiveRideId=null; nexo8dLastRide=null; booking={pickup:'',drop:'',step:1}; openBookingSheet(); }
+
+// Replace 8C demo functions with real flow.
+try{ nexo8cOpenDriverSearch = nexo8dOpenDriverSearch; }catch(e){}
+try{ requestRide = nexo8dOpenDriverSearch; }catch(e){}
+try{
+  const __nexo8dRateRide=rateRide;
+  rateRide=async function(id){
+    try{ const rating=await new Promise(resolve=>{ const box=document.createElement('div'); box.className='rating-overlay nexo8d-rating-overlay'; box.innerHTML=`<div class="rating-card nexo8d-rating-card"><h3>রেটিং ও সাজেশন দিন</h3><p>Destination reached. NEXO Ride experience কেমন হলো?</p><div class="star-row">${[1,2,3,4,5].map(n=>`<button onclick="this.closest('.rating-overlay').__rating=${n};this.closest('.rating-overlay').querySelectorAll('.star-row button').forEach((b,i)=>b.classList.toggle('on',i<${n}))">⭐</button>`).join('')}</div><textarea id="ratingComment" placeholder="Suggestion লিখুন, যেমন driver behaviour, timing, app problem..."></textarea><div class="ride-mini-actions"><button class="ghost" onclick="this.closest('.rating-overlay').remove();this.closest('.rating-overlay').__resolve(null)">Skip</button><button class="primary" onclick="this.closest('.rating-overlay').__resolve({rating:this.closest('.rating-overlay').__rating||5,comment:document.getElementById('ratingComment').value});this.closest('.rating-overlay').remove()">Submit</button></div></div>`; box.__rating=5; box.__resolve=resolve; document.body.appendChild(box); box.querySelectorAll('.star-row button').forEach(b=>b.classList.add('on')); }); if(!rating) return; await api(`/rides/${id}/rate`,{method:'POST',body:rating}); toast('Thanks. Rating & suggestion saved'); ridesView(); }catch(e){toast(e.message); try{return __nexo8dRateRide(id)}catch(_e){}}
+  }
+}catch(e){}
+
+// ===============================================================
+// Sprint-8E Reached Confirmation + Receipt + Passenger Feedback Flow
+// Driver complete -> Destination Reached notification -> Passenger confirms reached -> Rating/Suggestion -> Receipt.
+// ===============================================================
+try { window.NEXO_RIDE_SPRINT8E_REACHED_CONFIRM_RECEIPT_FLOW = true; } catch(e) {}
+function nexo8eNeedsReachedConfirm(r){ return roleMode==='PASSENGER' && String(r?.status||'').toUpperCase()==='DRIVER_REACHED_DROP'; }
+function nexo8eReceiptButton(r, cls='ghost'){
+  const st=String(r?.status||'').toUpperCase();
+  return ['DRIVER_REACHED_DROP','COMPLETED','PASSENGER_CONFIRMED'].includes(st) ? `<button class="${cls} mini-detail" onclick="event.stopPropagation();nexo8eOpenReceipt('${esc(r.id)}')">🧾 Receipt</button>` : '';
+}
+async function nexo8eConfirmReached(id, openRating=true){
+  try{
+    const out=await api(`/rides/${id}/confirm-reached`,{method:'POST',body:{source:'PASSENGER_APP'}});
+    toast('Reached confirmed. Ride completed.');
+    document.getElementById('rideDetailsOverlay')?.remove();
+    if(openRating) return rateRide(id);
+    ridesView();
+    return out;
+  }catch(e){ toast(e.message); ridesView(); }
+}
+async function nexo8eOpenReceipt(id){
+  try{
+    const d=await api(`/rides/${id}/receipt?t=${Date.now()}`);
+    const r=d.receipt||{}, ride=d.ride||{};
+    const old=document.getElementById('nexo8eReceiptOverlay'); if(old) old.remove();
+    const overlay=document.createElement('div'); overlay.id='nexo8eReceiptOverlay'; overlay.className='map-picker-overlay nexo8e-receipt-overlay';
+    overlay.innerHTML=`<div class="map-picker-card nexo8e-receipt-card"><div class="section-title"><h2>NEXO Receipt</h2><button onclick="document.getElementById('nexo8eReceiptOverlay')?.remove()">Close</button></div><div class="nexo8e-receipt-head"><b>${esc(r.receipt_no||'NEXO Receipt')}</b><span>${esc(r.generated_at||'')}</span></div><div class="ride-detail-route"><b>${esc(r.pickup||ride.pickup||'-')}</b><i>→</i><b>${esc(r.drop||ride.drop||'-')}</b></div><div class="ride-detail-grid passenger-detail-grid"><div><b>₹${r.fare||ride.estimated_fare||0}</b><span>Total Fare</span></div><div><b>${esc(r.payment_status||ride.payment_status||'-')}</b><span>Payment</span></div><div><b>${esc(r.vehicle_no||'-')}</b><span>Toto</span></div><div><b>${esc(r.driver_name||'-')}</b><span>Driver</span></div></div><div class="nexo8e-receipt-note">Booking completed with OTP safe ride flow. Keep this receipt for support/refund reference.</div><div class="ride-detail-actions"><button class="primary" onclick="window.print()">Print / Save</button><button class="ghost" onclick="shareTrip('${esc(id)}')">Share Trip</button></div></div>`;
+    document.body.appendChild(overlay);
+  }catch(e){ toast(e.message); }
+}
+const __nexo8eRideStatusText = typeof rideStatusText==='function' ? rideStatusText : null;
+if(__nexo8eRideStatusText){
+  rideStatusText=function(s){
+    const st=String(s||'').toUpperCase();
+    if(st==='DRIVER_REACHED_DROP') return 'Destination Reached';
+    return __nexo8eRideStatusText(s);
+  };
+}
+const __nexo8eBaseRideActionButtons = typeof rideActionButtons==='function' ? rideActionButtons : null;
+if(__nexo8eBaseRideActionButtons){
+  rideActionButtons=function(r){
+    if(nexo8eNeedsReachedConfirm(r)){
+      return `<div class="ride-action-stack sprint8e-actions"><button class="primary mini-pay" onclick="event.stopPropagation();nexo8eConfirmReached('${esc(r.id)}',true)">✅ Confirm Reached</button><button class="ghost mini-detail" onclick="event.stopPropagation();rateRide('${esc(r.id)}')">⭐ Rating</button>${nexo8eReceiptButton(r,'ghost')}</div>`;
+    }
+    let html=__nexo8eBaseRideActionButtons(r);
+    const rb=nexo8eReceiptButton(r,'ghost');
+    if(rb && html && html.includes('</div>')) html=html.replace('</div>', rb+'</div>');
+    return html;
+  };
+}
+const __nexo8eBaseOpenRideDetails = typeof openRideDetails==='function' ? openRideDetails : null;
+if(__nexo8eBaseOpenRideDetails){
+  openRideDetails=async function(id){
+    await __nexo8eBaseOpenRideDetails(id);
+    try{
+      const d=await api(`/rides/${id}/details?t=${Date.now()}`); const r=d.ride||{};
+      const actions=document.querySelector('#rideDetailsOverlay .ride-detail-actions');
+      if(actions){
+        if(nexo8eNeedsReachedConfirm(r)) actions.insertAdjacentHTML('afterbegin',`<button class="primary" onclick="nexo8eConfirmReached('${esc(r.id)}',true)">✅ Confirm Reached & Rate</button>`);
+        const st=String(r.status||'').toUpperCase();
+        if(['DRIVER_REACHED_DROP','COMPLETED','PASSENGER_CONFIRMED'].includes(st)) actions.insertAdjacentHTML('beforeend',`<button class="ghost" onclick="nexo8eOpenReceipt('${esc(r.id)}')">🧾 Receipt</button>`);
+      }
+    }catch(e){}
+  };
+}
+const __nexo8eBaseRideAction = typeof rideAction==='function' ? rideAction : null;
+if(__nexo8eBaseRideAction){
+  rideAction=async function(id,action){
+    const out=await __nexo8eBaseRideAction(id,action);
+    if(String(action||'').toLowerCase()==='complete' && roleMode==='DRIVER') toast('Destination reached notification sent to passenger.');
+    return out;
+  };
+}
+const __nexo8eBaseRateRide = typeof rateRide==='function' ? rateRide : null;
+if(__nexo8eBaseRateRide){
+  rateRide=async function(id){
+    try{
+      const d=await api(`/rides/${id}/details?t=${Date.now()}`);
+      if(String(d.ride?.status||'').toUpperCase()==='DRIVER_REACHED_DROP'){
+        await api(`/rides/${id}/confirm-reached`,{method:'POST',body:{source:'RATE_FLOW_AUTO_CONFIRM'}});
+      }
+    }catch(e){}
+    return __nexo8eBaseRateRide(id);
+  };
+}
+function nexo8eAutoReachedNotice(rides){
+  try{
+    if(roleMode!=='PASSENGER') return;
+    const waiting=(rides||[]).find(r=>String(r.status||'').toUpperCase()==='DRIVER_REACHED_DROP' && !sessionStorage.getItem('nexo8eReached_'+r.id));
+    if(waiting){ sessionStorage.setItem('nexo8eReached_'+waiting.id,'1'); toast('🏁 Destination reached. Confirm করে rating দিন.'); setTimeout(()=>openRideDetails(waiting.id),500); }
+  }catch(e){}
+}
+const __nexo8eBaseRidesView = typeof ridesView==='function' ? ridesView : null;
+if(__nexo8eBaseRidesView){
+  ridesView=async function(){
+    const res=await __nexo8eBaseRidesView();
+    try{ const r=await api('/rides?role='+roleMode+'&s8e=1'); nexo8eAutoReachedNotice(r.rides||[]); }catch(e){}
+    return res;
+  };
+}
+
+
+// ===============================================================
+// Sprint-8F Cancel + Support + Safety UX Polish
+// Adds a calm cancellation modal, ride-linked support ticket, refund request shortcut,
+// and a safety strip inside Ride Details without disturbing the 8D/8E booking flow.
+// ===============================================================
+try { window.NEXO_RIDE_SPRINT8F_CANCEL_SUPPORT_SAFETY_FLOW = true; } catch(e) {}
+function nexo8fOverlay(id, html){
+  const old=document.getElementById(id); if(old) old.remove();
+  const overlay=document.createElement('div'); overlay.id=id; overlay.className='map-picker-overlay sprint8f-overlay';
+  overlay.innerHTML=html; document.body.appendChild(overlay); return overlay;
+}
+function nexo8fCancelReasons(){
+  return ['Driver দেরি করছে','Wrong pickup/drop','Plan change','Payment problem','Driver/Passenger requested','Other'];
+}
+function nexo8fSelectReason(btn){
+  try{ const box=btn.closest('.sprint8f-card'); box.querySelectorAll('.sprint8f-reason').forEach(b=>b.classList.remove('active')); btn.classList.add('active'); const t=box.querySelector('#nexo8fCancelReason'); if(t) t.value=btn.dataset.reason||btn.textContent.trim(); }catch(e){}
+}
+function nexo8fCanRefund(r){ return roleMode==='PASSENGER' && String(r?.payment_status||'').toUpperCase()==='PAID' && !['COMPLETED','PASSENGER_CONFIRMED'].includes(String(r?.status||'').toUpperCase()); }
+async function cancelRide(id){
+  try{
+    let d={ride:{id}}; try{d=await api(`/rides/${id}/details?t=${Date.now()}`)}catch(e){}
+    const r=d.ride||{id};
+    const paid=String(r.payment_status||'').toUpperCase()==='PAID';
+    const reasons=nexo8fCancelReasons().map((x,i)=>`<button class="sprint8f-reason ${i===0?'active':''}" data-reason="${esc(x)}" onclick="nexo8fSelectReason(this)">${esc(x)}</button>`).join('');
+    nexo8fOverlay('nexo8fCancelOverlay',`<div class="map-picker-card sprint8f-card"><div class="section-title"><h2>Cancel Ride?</h2><button onclick="document.getElementById('nexo8fCancelOverlay')?.remove()">Close</button></div><div class="sprint8f-route"><b>${esc(r.pickup||'Pickup')}</b><i>→</i><b>${esc(r.drop||'Drop')}</b></div><p class="sprint8f-copy">Ride cancel করলে passenger ও driver—দুজনের কাছেই notification যাবে।${paid?' Paid ride হলে refund review তৈরি হতে পারে।':''}</p><div class="sprint8f-reasons">${reasons}</div><textarea id="nexo8fCancelReason" placeholder="Reason লিখুন">${esc(nexo8fCancelReasons()[0])}</textarea><div class="ride-detail-actions"><button class="ghost" onclick="document.getElementById('nexo8fCancelOverlay')?.remove()">Back</button><button class="primary danger-action" onclick="nexo8fSubmitCancel('${esc(id)}')">Confirm Cancel</button></div></div>`);
+  }catch(e){ toast(e.message); }
+}
+async function nexo8fSubmitCancel(id){
+  try{
+    const reason=(document.getElementById('nexo8fCancelReason')?.value||'Cancelled from app').trim();
+    await api(`/rides/${id}/cancel`,{method:'POST',body:{reason}});
+    toast('Ride cancelled. Notification sent.');
+    document.getElementById('nexo8fCancelOverlay')?.remove(); document.getElementById('rideDetailsOverlay')?.remove(); ridesView();
+  }catch(e){ toast(e.message); }
+}
+function nexo8fSupportCategories(){ return ['RIDE_HELP','PAYMENT','REFUND','DRIVER_BEHAVIOUR','APP_PROBLEM','SAFETY']; }
+async function nexo8fOpenSupport(id, preset='RIDE_HELP'){
+  try{
+    let d={ride:{id}}; try{d=await api(`/rides/${id}/details?t=${Date.now()}`)}catch(e){}
+    const r=d.ride||{id}; const cats=nexo8fSupportCategories().map(c=>`<option value="${c}" ${c===preset?'selected':''}>${c.replaceAll('_',' ')}</option>`).join('');
+    const msg=preset==='REFUND'?'Payment/refund বিষয়ে help চাই।':preset==='SAFETY'?'Safety support দরকার।':'Ride বিষয়ে support দরকার।';
+    nexo8fOverlay('nexo8fSupportOverlay',`<div class="map-picker-card sprint8f-card"><div class="section-title"><h2>NEXO Support</h2><button onclick="document.getElementById('nexo8fSupportOverlay')?.remove()">Close</button></div><div class="sprint8f-route"><b>${esc(r.pickup||'Pickup')}</b><i>→</i><b>${esc(r.drop||'Drop')}</b></div><select id="nexo8fSupportCat" class="big-input">${cats}</select><input id="nexo8fSupportSubject" class="big-input" value="${esc(preset.replaceAll('_',' '))}" placeholder="Subject"><textarea id="nexo8fSupportMsg" placeholder="সমস্যা লিখুন">${esc(msg)}</textarea><div class="ride-detail-actions"><a class="ghost" href="tel:${esc(config?.app_settings?.support_mobile||'')}">☎ Call Support</a><button class="primary" onclick="nexo8fSubmitSupport('${esc(id)}')">Create Ticket</button></div></div>`);
+  }catch(e){ toast(e.message); }
+}
+async function nexo8fSubmitSupport(id){
+  try{
+    const category=document.getElementById('nexo8fSupportCat')?.value||'RIDE_HELP';
+    const subject=(document.getElementById('nexo8fSupportSubject')?.value||category).trim();
+    const message=(document.getElementById('nexo8fSupportMsg')?.value||'Support needed').trim();
+    const out=await api('/support/tickets',{method:'POST',body:{ride_id:id,category,subject,message,priority:category==='SAFETY'?'HIGH':'NORMAL'}});
+    toast(`Support ticket created: ${String(out.ticket?.id||'').slice(-6)}`);
+    document.getElementById('nexo8fSupportOverlay')?.remove(); currentTab='support'; render();
+  }catch(e){ toast(e.message); }
+}
+async function nexo8fRequestRefund(id){
+  try{
+    const reason=prompt('Refund reason লিখুন','Ride cancelled / payment issue')||'Refund requested from app';
+    await api(`/rides/${id}/refund-request`,{method:'POST',body:{reason}});
+    toast('Refund request submitted for admin review.');
+    document.getElementById('rideDetailsOverlay')?.remove(); currentTab='support'; render();
+  }catch(e){ toast(e.message); }
+}
+function nexo8fSafetyPanel(r){
+  const st=String(r?.status||'').toUpperCase();
+  const active=['DRIVER_ACCEPTED','CONFIRMED','ARRIVED','STARTED','DRIVER_REACHED_DROP'].includes(st);
+  const support=esc(config?.app_settings?.support_mobile||'');
+  const refund=nexo8fCanRefund(r)?`<button class="ghost" onclick="nexo8fRequestRefund('${esc(r.id)}')">↩ Refund</button>`:'';
+  const sos=active?`<button class="ghost danger-action" onclick="sosRide('${esc(r.id)}')">🆘 SOS</button>`:'';
+  return `<div class="sprint8f-safety-panel"><b>Safety & Support</b><span>Share trip, SOS, support ticket এবং refund এক জায়গায়।</span><div class="ride-detail-actions"><button class="ghost" onclick="shareTrip('${esc(r.id)}')">🔗 Share Trip</button>${sos}<button class="ghost" onclick="nexo8fOpenSupport('${esc(r.id)}','RIDE_HELP')">🎧 Support</button>${refund}${support?`<a class="ghost" href="tel:${support}">☎ Call</a>`:''}</div></div>`;
+}
+const __nexo8fOpenRideDetails = typeof openRideDetails==='function' ? openRideDetails : null;
+if(__nexo8fOpenRideDetails){
+  openRideDetails=async function(id){
+    await __nexo8fOpenRideDetails(id);
+    try{
+      const d=await api(`/rides/${id}/details?t=${Date.now()}`); const r=d.ride||{};
+      const card=document.querySelector('#rideDetailsOverlay .ride-details-card');
+      if(card && !card.querySelector('.sprint8f-safety-panel')){
+        const actions=card.querySelector('.ride-detail-actions');
+        if(actions) actions.insertAdjacentHTML('beforebegin', nexo8fSafetyPanel(r));
+      }
+    }catch(e){}
+  };
+}
+const __nexo8fRideActionButtons = typeof rideActionButtons==='function' ? rideActionButtons : null;
+if(__nexo8fRideActionButtons){
+  rideActionButtons=function(r){
+    let html=__nexo8fRideActionButtons(r);
+    if(canCancelRideLocal(r) && !html.includes('nexo8fOpenSupport')){
+      html=html.replace('</div>', `<button class="ghost mini-detail" onclick="event.stopPropagation();nexo8fOpenSupport('${esc(r.id)}','RIDE_HELP')">Help</button></div>`);
+    }
+    return html;
+  };
+}
+
+// ===============================================================
+// Sprint-8H Pickup Ready + OTP Boarding Assistant
+// Passenger can tell driver “I am at pickup”, driver gets a calm OTP modal,
+// and passenger gets an arrival/OTP card before ride start.
+// ===============================================================
+try { window.NEXO_RIDE_SPRINT8H_PICKUP_OTP_BOARDING_ASSIST = true; } catch(e) {}
+function nexo8hPickupActive(r){ return ['CONFIRMED','ARRIVED'].includes(String(r?.status||'').toUpperCase()); }
+function nexo8hOtpVisible(r){ return roleMode==='PASSENGER' && nexo8hPickupActive(r) && r?.ride_otp; }
+function nexo8hPickupPanel(r){
+  const st=String(r?.status||'').toUpperCase();
+  if(!nexo8hPickupActive(r)) return '';
+  if(roleMode==='PASSENGER'){
+    const arrived=st==='ARRIVED';
+    return `<div class="sprint8h-pickup-panel"><div><b>${arrived?'Driver pickup point-এ এসেছে':'Driver pickup-এর পথে'}</b><span>${arrived?'OTP বলুন, তারপর ride start হবে।':'Pickup point-এ দাঁড়িয়ে থাকলে driver-কে ready message পাঠাতে পারেন।'}</span></div>${nexo8hOtpVisible(r)?`<div class="sprint8h-otp"><small>Passenger OTP</small><strong>${esc(r.ride_otp)}</strong></div>`:''}<div class="ride-detail-actions"><button class="primary" onclick="nexo8hPassengerReady('${esc(r.id)}')">📍 I am at pickup</button><button class="ghost" onclick="shareTrip('${esc(r.id)}')">🔗 Share</button></div></div>`;
+  }
+  if(roleMode==='DRIVER' && st==='ARRIVED'){
+    return `<div class="sprint8h-pickup-panel driver"><div><b>Passenger OTP নিয়ে ride start করুন</b><span>Passenger-এর কাছ থেকে 4 digit OTP নিয়ে verify করুন। OTP ছাড়া ride start হবে না।</span></div><button class="primary" onclick="nexo8hStartOtpModal('${esc(r.id)}')">🔐 Enter OTP & Start</button></div>`;
+  }
+  return '';
+}
+async function nexo8hPassengerReady(id){
+  try{
+    const note = prompt('Driver-এর জন্য pickup note লিখুন','আমি pickup point-এ আছি') || 'Passenger is waiting at pickup';
+    const body={note};
+    try{
+      if(navigator.geolocation){
+        const pos = await new Promise(resolve=>navigator.geolocation.getCurrentPosition(resolve,()=>resolve(null),{enableHighAccuracy:true,timeout:4500,maximumAge:30000}));
+        if(pos?.coords){ body.lat=pos.coords.latitude; body.lng=pos.coords.longitude; }
+      }
+    }catch(_e){}
+    await api(`/rides/${id}/passenger-ready`,{method:'POST',body});
+    toast('Driver-কে pickup ready notification পাঠানো হয়েছে');
+    document.getElementById('rideDetailsOverlay')?.remove();
+    ridesView();
+  }catch(e){ toast(e.message); }
+}
+function nexo8hStartOtpModal(id){
+  const old=document.getElementById('nexo8hOtpOverlay'); if(old) old.remove();
+  const overlay=document.createElement('div'); overlay.id='nexo8hOtpOverlay'; overlay.className='map-picker-overlay sprint8h-overlay';
+  overlay.innerHTML=`<div class="map-picker-card sprint8h-card"><div class="section-title"><h2>Start Ride with OTP</h2><button onclick="document.getElementById('nexo8hOtpOverlay')?.remove()">Close</button></div><p>Passenger-এর কাছে থাকা 4 digit OTP দিন। OTP match করলেই ride start হবে।</p><input id="otp-${esc(id)}" class="sprint8h-otp-input" inputmode="numeric" maxlength="4" placeholder="----" autocomplete="one-time-code"><div class="ride-detail-actions"><button class="ghost" onclick="document.getElementById('nexo8hOtpOverlay')?.remove()">Back</button><button class="primary" onclick="nexo8hSubmitStart('${esc(id)}')">Verify & Start Ride</button></div></div>`;
+  document.body.appendChild(overlay);
+  setTimeout(()=>document.getElementById(`otp-${id}`)?.focus(),100);
+}
+async function nexo8hSubmitStart(id){
+  try{
+    const otp=(document.getElementById(`otp-${id}`)?.value||'').trim();
+    if(!otp) return toast('Passenger OTP দিন');
+    const out=await api(`/rides/${id}/start`,{method:'POST',body:{otp}});
+    toast('OTP verified. Ride started safely.');
+    document.getElementById('nexo8hOtpOverlay')?.remove(); document.getElementById('rideDetailsOverlay')?.remove();
+    ridesView(); return out;
+  }catch(e){ toast(e.message); }
+}
+const __nexo8hRideActionButtons = typeof rideActionButtons==='function' ? rideActionButtons : null;
+if(__nexo8hRideActionButtons){
+  rideActionButtons=function(r){
+    const st=String(r?.status||'').toUpperCase();
+    if(roleMode==='DRIVER' && st==='ARRIVED'){
+      return `<div class="ride-action-stack sprint8h-actions"><button class="primary big-action" onclick="event.stopPropagation();nexo8hStartOtpModal('${esc(r.id)}')">🔐 Enter OTP & Start</button><button class="ghost mini-detail" onclick="event.stopPropagation();openRideDetails('${esc(r.id)}')">Details</button></div>`;
+    }
+    let html=__nexo8hRideActionButtons(r);
+    if(roleMode==='PASSENGER' && nexo8hPickupActive(r) && !html.includes('nexo8hPassengerReady')){
+      html=html.replace('</div>', `<button class="ghost mini-detail" onclick="event.stopPropagation();nexo8hPassengerReady('${esc(r.id)}')">📍 Ready</button></div>`);
+    }
+    return html;
+  };
+}
+const __nexo8hOpenRideDetails = typeof openRideDetails==='function' ? openRideDetails : null;
+if(__nexo8hOpenRideDetails){
+  openRideDetails=async function(id){
+    await __nexo8hOpenRideDetails(id);
+    try{
+      const d=await api(`/rides/${id}/details?t=${Date.now()}`); const r=d.ride||{};
+      const card=document.querySelector('#rideDetailsOverlay .ride-details-card');
+      if(card && !card.querySelector('.sprint8h-pickup-panel')){
+        const actions=card.querySelector('.ride-detail-actions');
+        const panel=nexo8hPickupPanel(r);
+        if(actions && panel) actions.insertAdjacentHTML('beforebegin',panel);
+      }
+    }catch(e){}
+  };
+}
+const __nexo8hRideAction = typeof rideAction==='function' ? rideAction : null;
+if(__nexo8hRideAction){
+  rideAction=async function(id,action){
+    if(String(action||'').toLowerCase()==='start'){
+      const inp=document.getElementById(`otp-${id}`);
+      if(!inp || !inp.value.trim()){ nexo8hStartOtpModal(id); return; }
+    }
+    return __nexo8hRideAction(id,action);
+  };
+}
+function nexo8hAutoArrivedNotice(rides){
+  try{
+    if(roleMode!=='PASSENGER') return;
+    const r=(rides||[]).find(x=>String(x.status||'').toUpperCase()==='ARRIVED' && !sessionStorage.getItem('nexo8hArrived_'+x.id));
+    if(r){ sessionStorage.setItem('nexo8hArrived_'+r.id,'1'); toast('📍 Driver pickup point-এ এসেছে। OTP ready রাখুন।'); setTimeout(()=>openRideDetails(r.id),550); }
+  }catch(e){}
+}
+const __nexo8hRidesView = typeof ridesView==='function' ? ridesView : null;
+if(__nexo8hRidesView){
+  ridesView=async function(){
+    const res=await __nexo8hRidesView();
+    try{ const r=await api('/rides?role='+roleMode+'&s8h=1'); nexo8hAutoArrivedNotice(r.rides||[]); }catch(e){}
+    return res;
+  };
+}
+
+
+// ===============================================================
+// Sprint-8I Saved Places + Repeat Ride Convenience Layer
+// Passenger can save Home/Work/Favourite points and rebook recent rides quickly.
+// ===============================================================
+try { window.NEXO_RIDE_SPRINT8I_SAVED_PLACES_REPEAT_RIDE = true; } catch(e) {}
+let nexo8iSavedCache = null;
+async function nexo8iLoadSavedPlaces(force=false){
+  if(nexo8iSavedCache && !force) return nexo8iSavedCache;
+  try{ nexo8iSavedCache = await api('/users/saved-places'); return nexo8iSavedCache; }
+  catch(e){ return {places:[], recent_rides:[]}; }
+}
+function nexo8iPlaceIcon(t){ t=String(t||'').toUpperCase(); return t==='HOME'?'🏠':t==='WORK'?'🏢':t==='PICKUP'?'📍':t==='DROP'?'🏁':'⭐'; }
+function nexo8iQuickSet(type,name){ setPoint(type,name); try{nexo8cRenderRoutePreview()}catch(e){} }
+async function nexo8iSavePlace(type){
+  try{
+    const current = type==='pickup' ? booking.pickup : booking.drop;
+    const name = prompt('Saved place name দিন', current || 'Home');
+    if(!name) return;
+    const label = prompt('Type লিখুন: HOME / WORK / CUSTOM', type==='pickup'?'HOME':'CUSTOM') || 'CUSTOM';
+    await api('/users/saved-places',{method:'POST',body:{name,type:label}});
+    nexo8iSavedCache=null; toast('Place saved');
+    try{ await nexo8cRenderRoutePreview(); }catch(e){ refreshBookingStep(); }
+  }catch(e){ toast(e.message); }
+}
+async function nexo8iDeletePlace(id){
+  try{ await api('/users/saved-places/'+encodeURIComponent(id),{method:'DELETE'}); nexo8iSavedCache=null; toast('Saved place removed'); render(); }
+  catch(e){ toast(e.message); }
+}
+function nexo8iSavedChips(type){
+  const places=(nexo8iSavedCache?.places||[]).slice(0,8);
+  if(!places.length) return `<div class="nexo8i-empty">Home/Work/Favourite save করলে এখানে দেখাবে।</div>`;
+  return `<div class="nexo8i-place-row">${places.map(p=>`<button onclick="nexo8iQuickSet('${type}','${esc(p.name).replace(/'/g,'&#39;')}')"><i>${nexo8iPlaceIcon(p.type)}</i><b>${esc(p.name)}</b><small>${esc(p.type||'CUSTOM')}</small></button>`).join('')}</div>`;
+}
+function nexo8iRecentRideCards(){
+  const list=(nexo8iSavedCache?.recent_rides||[]).slice(0,4);
+  if(!list.length) return '';
+  return `<section class="card sprint8i-card"><div class="section-title"><h2>Repeat Ride</h2><button>Recent</button></div><div class="list">${list.map(r=>`<div class="row" onclick="booking.pickup='${esc(r.pickup||'').replace(/'/g,'&#39;')}';booking.drop='${esc(r.drop||'').replace(/'/g,'&#39;')}';openBookingSheet()"><i>↻</i><div><b>${esc(r.pickup||'-')} → ${esc(r.drop||'-')}</b><span>${esc(r.status||'')} · ₹${r.estimated_fare||0}</span></div><em>Book</em></div>`).join('')}</div></section>`;
+}
+const __nexo8iBookingStepHtml = typeof bookingStepHtml==='function' ? bookingStepHtml : null;
+if(__nexo8iBookingStepHtml){
+  bookingStepHtml=function(){
+    let html=__nexo8iBookingStepHtml();
+    try{
+      if(booking.step===1){
+        html=html.replace('<div class="place-grid">', `<div class="sprint8i-saved"><div class="sprint8i-head"><b>Saved Pickup</b><button class="ghost" onclick="nexo8iSavePlace('pickup')">+ Save</button></div>${nexo8iSavedChips('pickup')}</div><div class="place-grid">`);
+      } else if(booking.step===2){
+        html=html.replace('<div class="place-grid">', `<div class="sprint8i-saved"><div class="sprint8i-head"><b>Saved Drop</b><button class="ghost" onclick="nexo8iSavePlace('drop')">+ Save</button></div>${nexo8iSavedChips('drop')}</div><div class="place-grid">`);
+      }
+    }catch(e){}
+    return html;
+  };
+}
+const __nexo8iOpenBookingSheet = typeof openBookingSheet==='function' ? openBookingSheet : null;
+if(__nexo8iOpenBookingSheet){
+  openBookingSheet=async function(prefill){
+    await nexo8iLoadSavedPlaces(true);
+    return __nexo8iOpenBookingSheet(prefill);
+  };
+}
+const __nexo8iPassengerHome = typeof passengerHome==='function' ? passengerHome : null;
+if(__nexo8iPassengerHome){
+  passengerHome=async function(){
+    await nexo8iLoadSavedPlaces(true);
+    __nexo8iPassengerHome();
+    try{
+      const main=document.querySelector('main') || document.querySelector('#app') || document.body;
+      const firstCard=document.querySelector('.public-passenger-home')?.parentElement || document.querySelector('.public-passenger-home');
+      const saved=(nexo8iSavedCache?.places||[]).slice(0,6);
+      const savedHtml=`<section class="card sprint8i-card"><div class="section-title"><h2>Saved Places</h2><button>${saved.length}</button></div><div class="sprint8i-place-row home">${saved.map(p=>`<button onclick="booking.pickup='${esc(p.name).replace(/'/g,'&#39;')}';openBookingSheet()"><i>${nexo8iPlaceIcon(p.type)}</i><b>${esc(p.name)}</b><small>${esc(p.type||'CUSTOM')}</small></button>`).join('') || `<div class="nexo8i-empty">Home, Office, Hospital, Station favourite হিসেবে save করুন।</div>`}</div></section>${nexo8iRecentRideCards()}`;
+      if(firstCard) firstCard.insertAdjacentHTML('afterend', savedHtml); else main.insertAdjacentHTML('afterbegin', savedHtml);
+    }catch(e){}
+  };
+}
+const __nexo8iProfileView = typeof profileView==='function' ? profileView : null;
+if(__nexo8iProfileView){
+  profileView=async function(){
+    await __nexo8iProfileView();
+    try{
+      const d=await nexo8iLoadSavedPlaces(true);
+      const rows=(d.places||[]).slice(0,12).map(p=>`<div class="row"><i>${nexo8iPlaceIcon(p.type)}</i><div><b>${esc(p.name)}</b><span>${esc(p.type||'CUSTOM')} · used ${p.used_count||0}</span></div><em onclick="event.stopPropagation();nexo8iDeletePlace('${esc(p.id)}')">Delete</em></div>`).join('') || '<div class="alert">No saved place yet.</div>';
+      document.querySelector('main')?.insertAdjacentHTML('beforeend', `<section class="card sprint8i-card"><div class="section-title"><h2>Saved Places</h2><button onclick="openBookingSheet()">Book</button></div><div class="list">${rows}</div></section>`);
+    }catch(e){}
+  };
+}

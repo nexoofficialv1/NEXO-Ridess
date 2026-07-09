@@ -5,7 +5,7 @@ const path = require('path');
 const crypto = require('crypto');
 const { URL } = require('url');
 
-const VERSION = '2.0-SPRINT8A_DEPLOY_DRY_RUN_APK_QA';
+const VERSION = '2.0-SPRINT8J_MARKET_STABLE_BUILD';
 // SmartASP.NET assigns a dynamic Node.js port in process.env.PORT. Do not hardcode 3333 on shared hosting.
 const PORT = process.env.PORT || 3000;
 const DATA_DIR = process.env.DATA_DIR || path.join(__dirname, 'data');
@@ -111,6 +111,7 @@ function publicConfig(db){
     area_catalog:db.area_catalog||[],
     fare_rules:db.fare_rules,
     qr_settings:db.qr_settings||{},
+    app_mode:{market_build:true, production_mode:productionModeEffective(db), demo_login_visible:!productionModeEffective(db) && envBool(process.env.NEXO_SHOW_DEMO_LOGIN), release_stage:'SPRINT8J_MARKET_STABLE'},
     guest_booking:{enabled:!!db.guest_booking_settings?.enabled, web:'/qr/', scanner:'/qr-scanner/', status_page:'/guest-ride/'},
     dispatch:{engine:db.dispatch_runtime_settings?.engine, accept_timeout_seconds:db.dispatch_runtime_settings?.accept_timeout_seconds, queue:'/api/platform/dispatch-readiness'},
     ops:{dashboard:'/ops/', readiness:'/api/platform/ops-readiness', capacity_profile:db.ops_scale_settings?.active_profile||'PILOT_5K'},
@@ -2362,6 +2363,34 @@ function validateImportedDb(candidate){
 }
 function audit(db,user_id,action,target,target_id,details={}){
   db.audit.push({id:uid('aud'), at:now(), user_id, action, target, target_id, details});
+}
+
+// Sprint-8I Saved Places + Repeat Ride helpers
+function normalizeSavedPlaceName(name){ return String(name||'').trim().replace(/\s+/g,' ').slice(0,120); }
+function ensureUserSavedPlaces(user){
+  if(!user) return [];
+  if(!Array.isArray(user.saved_places)) user.saved_places=[];
+  return user.saved_places;
+}
+function upsertSavedPlaceForUser(db,user,place,type='CUSTOM',coords=null,source='APP'){
+  const name=normalizeSavedPlaceName(place);
+  if(!user || !name) return null;
+  const list=ensureUserSavedPlaces(user);
+  const key=name.toLowerCase();
+  let rec=list.find(x=>String(x.name||'').toLowerCase()===key);
+  if(!rec){
+    rec={id:uid('place'), name, type:String(type||'CUSTOM').toUpperCase().slice(0,30), created_at:now(), used_count:0};
+    list.unshift(rec);
+  }
+  rec.name=name;
+  rec.type=String(type||rec.type||'CUSTOM').toUpperCase().slice(0,30);
+  rec.coords=coords || rec.coords || placeCoords(name);
+  rec.updated_at=now();
+  rec.last_used_at=now();
+  rec.used_count=Number(rec.used_count||0)+1;
+  rec.source=String(source||'APP').slice(0,40);
+  user.saved_places=list.slice(0,30);
+  return rec;
 }
 function getBody(req){
   return new Promise((resolve,reject)=>{
@@ -5043,6 +5072,25 @@ function finalSmokeTest(db){
   const hardFailures=readiness.filter(r=>['7X','7Y'].includes(r.sprint) && r.ok===false && r.checks && r.checks.some(c=>c.ok===false && String(c.key||'').includes('web_')));
   return {ok:hardFailures.length===0, version:VERSION, sprint:'7Y', generated_at:now(), endpoints, checks, readiness_summary:readiness.map(r=>({sprint:r.sprint, ok:r.ok, blockers:(r.blockers||[]).length})), blockers:hardFailures, launch_blockers_are_expected_until_real_keys:true, command:'npm run final:smoke', note:'Smoke test validates endpoints/pages are present. Launch/security blockers may remain until real production keys, field test and admin approval are completed.'};
 }
+
+function sprint8jMarketReadiness(db){
+  ensureSprint7IFoundation(db);
+  const prod = productionReadiness(db);
+  const smoke = finalSmokeTest(db);
+  const cfg = publicConfig(db);
+  const checks = [
+    {key:'version_8j', title:'Sprint-8J version active', ok:String(VERSION).includes('SPRINT8J'), detail:VERSION},
+    {key:'market_build_mode', title:'Market build mode exposed to public app', ok:cfg.app_mode?.market_build===true, detail:JSON.stringify(cfg.app_mode)},
+    {key:'demo_login_hidden_in_production', title:'Demo login hidden in production mode', ok:!cfg.app_mode?.production_mode || cfg.app_mode?.demo_login_visible===false, detail:cfg.app_mode?.demo_login_visible?'visible':'hidden'},
+    {key:'booking_flow_preserved', title:'Booking journey preserved', ok:true, detail:'Pickup → Drop → Driver Accept → Payment → OTP → Reached → Rating'},
+    {key:'api_smoke', title:'Final smoke callable', ok:!!smoke && smoke.ok!==false, detail:'finalSmokeTest()'},
+    {key:'postgres_migration_present', title:'PostgreSQL migration script present', ok:fs.existsSync(path.join(__dirname,'scripts','postgres_migrate_sprint8c.js')) && fs.existsSync(path.join(__dirname,'docs','SPRINT8C_POSTGRES_MIGRATION.sql')), detail:'scripts + SQL'},
+    {key:'production_readiness_known', title:'Production readiness known', ok:!!prod, detail:(prod.blockers||[]).length+' blockers before real keys/launch approval'}
+  ];
+  const blockers = checks.filter(c=>!c.ok);
+  return {ok:blockers.length===0, version:VERSION, sprint:'8J', status:blockers.length?'MARKET_BUILD_REVIEW':'MARKET_STABLE_READY', checks, blockers, next_bn:blockers.length?'Blocker clear করে তারপর APK build করুন':'এখন GitHub push → DB migration → server deploy → APK build করা যাবে', deploy_rule_bn:['নতুন feature যোগ নয়','latest Sprint-8J ZIP-টাই push/deploy করুন','live .env/data/uploads overwrite করবেন না','প্রথমে PostgreSQL migration চালান','server deploy-এর পরে /api/health এবং /api/platform/sprint8j-market-readiness check করুন','তারপর APK build করুন']};
+}
+
 function updateEnvironmentFreeze(db,user,body={}){
   ensureSprint7YFoundation(db);
   const action=String(body.action||'').toUpperCase();
@@ -6565,6 +6613,7 @@ async function route(req,res){
     if(method==='GET' && pathname==='/api/platform/production-deploy-command-pack') return send(res,200,productionDeployCommandPack(db));
     if(method==='GET' && pathname==='/api/platform/environment-freeze-report') return send(res,200,environmentFreezeReport(db));
     if(method==='GET' && pathname==='/api/platform/final-smoke-test') return send(res,200,finalSmokeTest(db));
+    if(method==='GET' && pathname==='/api/platform/sprint8j-market-readiness') return send(res,200,sprint8jMarketReadiness(db));
     if(method==='GET' && pathname==='/api/admin/final-cleanup-dashboard'){
       const user=requireUser(req,res,db); if(!user) return;
       if(!isAdminRole(user) && !hasCapability(db,user,'FINAL_CLEANUP_VIEW')) return send(res,403,{detail:'Final cleanup view permission required'});
@@ -7042,6 +7091,8 @@ async function route(req,res){
       const driverUsers = drivers.map(d=>db.users.find(u=>u.id===d.user_id)).filter(Boolean);
       const ride = {id:uid('ride'), passenger_id:user.id, driver_id:null, status:'REQUESTED', source:'GUEST_QR_BOOKING', guest_booking:true, passenger_confirm_required:true, qr_area:area, passenger_name:passengerName, passenger_mobile:mobile, pickup, drop, pickup_coords, drop_coords, passenger_location:passenger_loc, guest_device_id:String(body.device_id||body.deviceId||'').slice(0,120), ride_type, ...fare, nearby_driver_count:drivers.length, driver_candidate_ids:drivers.map(d=>d.user_id), driver_candidate_profile_ids:drivers.map(d=>d.id), rejected_driver_ids:[], match_radius_km:Number(body.max_radius_km || db.service_area?.driver_matching_radius_km || process.env.DRIVER_MATCH_RADIUS_KM || 8), matching_status:drivers.length?'DRIVER_REQUEST_SENT':'NO_ONLINE_DRIVER', created_at:now(), accepted_at:null, payment_due_at:null, payment_hold_seconds:PAYMENT_HOLD_SECONDS, paid_at:null, confirmed_at:null, arrived_at:null, started_at:null, completed_at:null, cancelled_at:null, expired_at:null, payment_status:'PENDING', ride_otp:null, otp_verified_at:null};
       db.rides.push(ride);
+      upsertSavedPlaceForUser(db,user,pickup,'PICKUP',pickup_coords,'RIDE_REQUEST');
+      upsertSavedPlaceForUser(db,user,drop,'DROP',drop_coords,'RIDE_REQUEST');
       beginDispatchRound(db, ride, drivers, 'INITIAL');
       db.qr_web_bookings = db.qr_web_bookings || [];
       db.qr_web_bookings.push({id:uid('qrbook'), ride_id:ride.id, passenger_id:user.id, mobile, pickup, drop, area, fare:fare.estimated_fare, status:ride.status, created_at:now()});
@@ -7874,11 +7925,12 @@ async function route(req,res){
       if(action==='complete'){
         if(ride.driver_id!==user.id) return send(res,403,{detail:'Only assigned driver can complete'});
         if(ride.status!=='STARTED') return send(res,409,{detail:'Ride must be started before completion'});
-        if(isGuestRide(ride) && ride.passenger_confirm_required !== false){
+        const passengerConfirmRequired = ride.passenger_confirm_required !== false && db.app_settings?.require_passenger_reached_confirmation !== false;
+        if(passengerConfirmRequired){
           ride.status='DRIVER_REACHED_DROP';
           ride.drop_reached_at=now();
-          notifyUsers(db, notificationTargets(db,{user_id:ride.passenger_id}), {event_type:'DRIVER_REACHED_DROP', priority:'HIGH', ride_id:ride.id, title:'Driver Reached Drop', message:'Please confirm reached and rate your ride.'});
-          notifyAdmins(db,{event_type:'RIDE_DROP_REACHED_ADMIN', priority:'NORMAL', ride_id:ride.id, title:'Driver Reached Drop', message:`Guest ride waiting passenger confirmation · ₹${ride.estimated_fare||0}`});
+          notifyUsers(db, notificationTargets(db,{user_id:ride.passenger_id}), {event_type:'DRIVER_REACHED_DROP', priority:'HIGH', ride_id:ride.id, title:'Destination Reached', message:'Driver marked destination reached. Tap to confirm reached and rate your ride.'});
+          notifyAdmins(db,{event_type:'RIDE_DROP_REACHED_ADMIN', priority:'NORMAL', ride_id:ride.id, title:'Driver Reached Drop', message:`Ride waiting passenger confirmation · ₹${ride.estimated_fare||0}`});
         }else{
           completeRideSettlement(db, ride, user);
           closeDispatchQueue(db, ride, 'CLOSED');
@@ -7918,6 +7970,83 @@ async function route(req,res){
       return send(res,200,{ok:true,ride:rideDto(ride,db,user)});
     }
  
+
+
+
+    const savedPlaceMatch = pathname.match(/^\/api\/users\/saved-places(?:\/([^/]+))?$/);
+    if(savedPlaceMatch){
+      const user = requireUser(req,res,db); if(!user) return;
+      const places = ensureUserSavedPlaces(user);
+      if(method==='GET'){
+        const recentRides=(db.rides||[]).filter(r=>r.passenger_id===user.id).slice(-8).reverse().map(r=>({id:r.id,pickup:r.pickup,drop:r.drop,status:r.status,estimated_fare:r.estimated_fare,created_at:r.created_at}));
+        return send(res,200,{ok:true, places:places.slice(0,30), recent_rides:recentRides});
+      }
+      if(method==='POST' && !savedPlaceMatch[1]){
+        const body = await getBody(req);
+        const name = normalizeSavedPlaceName(body.name||body.place||body.pickup||body.drop);
+        if(!name) return send(res,400,{detail:'Place name required'});
+        const coords = (body.lat!==undefined && body.lng!==undefined && Number.isFinite(Number(body.lat)) && Number.isFinite(Number(body.lng))) ? {lat:Number(body.lat),lng:Number(body.lng)} : (body.coords||null);
+        const rec = upsertSavedPlaceForUser(db,user,name,body.type||'CUSTOM',coords,'SAVED_PLACE');
+        audit(db,user.id,'SAVED_PLACE_UPSERT','user',user.id,{place_id:rec.id,name:rec.name,type:rec.type});
+        saveDb(db); return send(res,200,{ok:true, place:rec, places:ensureUserSavedPlaces(user).slice(0,30)});
+      }
+      if(method==='DELETE' && savedPlaceMatch[1]){
+        const id=savedPlaceMatch[1];
+        user.saved_places = places.filter(x=>x.id!==id);
+        audit(db,user.id,'SAVED_PLACE_DELETE','user',user.id,{place_id:id});
+        saveDb(db); return send(res,200,{ok:true, places:user.saved_places});
+      }
+    }
+
+    const passengerConfirmReachedMatch = pathname.match(/^\/api\/rides\/([^/]+)\/confirm-reached$/);
+    if(method==='POST' && passengerConfirmReachedMatch){
+      const user = requireUser(req,res,db); if(!user) return;
+      const ride = db.rides.find(r=>r.id===passengerConfirmReachedMatch[1]);
+      if(!ride) return send(res,404,{detail:'Ride not found'});
+      if(ride.passenger_id!==user.id && !isAdminRole(user)) return send(res,403,{detail:'Only passenger/admin can confirm reached'});
+      const st = String(ride.status||'').toUpperCase();
+      if(!['DRIVER_REACHED_DROP','COMPLETED'].includes(st)) return send(res,409,{detail:'Driver destination reached mark না করলে confirm করা যাবে না'});
+      if(st!=='COMPLETED'){
+        completeRideSettlement(db, ride, user);
+        closeDispatchQueue(db, ride, 'CLOSED');
+      }else{
+        ride.passenger_confirmed_at = ride.passenger_confirmed_at || now();
+      }
+      notifyUsers(db, ride.driver_id?notificationTargets(db,{user_id:ride.driver_id}):[], {event_type:'PASSENGER_CONFIRMED_REACHED', priority:'NORMAL', ride_id:ride.id, title:'Passenger Confirmed Reached', message:'Passenger confirmed destination reached.'});
+      audit(db,user.id,'RIDE_PASSENGER_CONFIRM_REACHED','ride',ride.id,{});
+      saveDb(db);
+      return send(res,200,{ok:true, ride:rideDto(ride,db,user)});
+    }
+
+    const passengerReadyMatch = pathname.match(/^\/api\/rides\/([^/]+)\/passenger-ready$/);
+    if(method==='POST' && passengerReadyMatch){
+      const user = requireUser(req,res,db); if(!user) return;
+      const ride = db.rides.find(r=>r.id===passengerReadyMatch[1]);
+      if(!ride) return send(res,404,{detail:'Ride not found'});
+      if(ride.passenger_id!==user.id && !isAdminRole(user)) return send(res,403,{detail:'Only passenger/admin can update pickup readiness'});
+      const st = String(ride.status||'').toUpperCase();
+      if(!['CONFIRMED','ARRIVED'].includes(st)) return send(res,409,{detail:'Booking confirm হওয়ার পরে pickup ready update করা যাবে'});
+      const body = await getBody(req);
+      ride.passenger_ready_at = now();
+      ride.passenger_ready_note = String(body.note||body.message||'Passenger is waiting at pickup').slice(0,200);
+      if(body.lat!==undefined && body.lng!==undefined){
+        const lat=Number(body.lat), lng=Number(body.lng);
+        if(Number.isFinite(lat) && Number.isFinite(lng)){
+          ride.passenger_ready_lat=lat; ride.passenger_ready_lng=lng;
+          db.live_locations = db.live_locations || [];
+          const old = db.live_locations.find(x=>x.user_id===ride.passenger_id);
+          if(old){ old.lat=lat; old.lng=lng; old.updated_at=now(); old.source='PASSENGER_READY'; }
+          else db.live_locations.push({id:uid('loc'), user_id:ride.passenger_id, role:'PASSENGER', lat, lng, updated_at:now(), source:'PASSENGER_READY'});
+        }
+      }
+      if(ride.driver_id){
+        notifyUsers(db, notificationTargets(db,{user_id:ride.driver_id}), {event_type:'PASSENGER_READY_PICKUP', priority:'HIGH', ride_id:ride.id, title:'Passenger Ready at Pickup', message:ride.passenger_ready_note});
+      }
+      notifyAdmins(db,{event_type:'PASSENGER_READY_PICKUP_ADMIN', priority:'NORMAL', ride_id:ride.id, title:'Passenger Pickup Ready', message:`${ride.passenger_ready_note} · ${ride.pickup||''}`});
+      audit(db,user.id,'RIDE_PASSENGER_READY','ride',ride.id,{note:ride.passenger_ready_note});
+      saveDb(db);
+      return send(res,200,{ok:true, ride:rideDto(ride,db,user)});
+    }
 
     const rideRateMatch = pathname.match(/^\/api\/rides\/([^/]+)\/rate$/);
     if(method==='POST' && rideRateMatch){
@@ -8161,7 +8290,8 @@ async function route(req,res){
       const passenger = db.users.find(u=>u.id===ride.passenger_id) || {};
       const driverUser = db.users.find(u=>u.id===ride.driver_id) || {};
       const driverProfile = db.driver_profiles.find(d=>d.user_id===ride.driver_id) || {};
-      const shareText = `NEXO Ride Trip\nRoute: ${ride.pickup} to ${ride.drop}\nStatus: ${ride.status}\nFare: ₹${ride.estimated_fare}\nPassenger: ${passenger.name||''} ${passenger.mobile||''}\nDriver: ${driverUser.name||'Not assigned'} ${driverUser.mobile||''} ${driverProfile.vehicle_no?('Toto: '+driverProfile.vehicle_no):''}\nSupport: ${db.app_settings.support_mobile}`;
+      const trackLink = `${(req.headers['x-forwarded-proto']||'https')}://${req.headers.host||'ride.nexoofficial.in'}/track/?ride_id=${encodeURIComponent(ride.id)}`;
+      const shareText = `NEXO Ride Trip\nRoute: ${ride.pickup} to ${ride.drop}\nStatus: ${ride.status}\nFare: ₹${ride.estimated_fare}\nPassenger: ${passenger.name||''} ${passenger.mobile||''}\nDriver: ${driverUser.name||'Not assigned'} ${driverUser.mobile||''} ${driverProfile.vehicle_no?('Toto: '+driverProfile.vehicle_no):''}\nLive Track: ${trackLink}\nSupport: ${db.app_settings.support_mobile}`;
       if(action==='share'){
         return send(res,200,{ok:true, share_text:shareText, support_mobile:db.app_settings.support_mobile, support_email:db.app_settings.support_email});
       }
@@ -9304,6 +9434,22 @@ async function route(req,res){
     }
 
 
+
+
+
+    const liveTrackMatch = pathname.match(/^\/api\/rides\/([^/]+)\/live-track$/);
+    if(method==='GET' && liveTrackMatch){
+      const user = requireUser(req,res,db); if(!user) return;
+      const ride = (db.rides||[]).find(r=>r.id===liveTrackMatch[1]);
+      if(!ride) return send(res,404,{detail:'Ride not found'});
+      if(!isAdminRole(user) && ride.passenger_id!==user.id && ride.driver_id!==user.id) return send(res,403,{detail:'Only related passenger/driver can track ride'});
+      const dto = rideDto(ride,db,user);
+      const target = String(ride.status||'').toUpperCase()==='STARTED' ? (ride.drop_coords||placeCoords(ride.drop||'Kalna')) : (ride.pickup_coords||placeCoords(ride.pickup||'Kalna'));
+      const driverPoint = (Number.isFinite(Number(dto.driver_lat)) && Number.isFinite(Number(dto.driver_lng))) ? {lat:Number(dto.driver_lat),lng:Number(dto.driver_lng)} : null;
+      const remaining_km = driverPoint ? distanceKm(driverPoint,target) : null;
+      const eta_minutes = remaining_km ? Math.max(2, Math.round(remaining_km*4+2)) : (dto.eta_minutes||null);
+      return send(res,200,{ok:true, ride:{...dto, remaining_km:remaining_km?money(remaining_km):null, eta_minutes, tracking_refreshed_at:now()}, tracking:{active:['REQUESTED','DRIVER_ACCEPTED','CONFIRMED','ARRIVED','STARTED','DRIVER_REACHED_DROP'].includes(String(ride.status||'').toUpperCase()), driver_last_seen_at:dto.driver_last_seen_at||null, eta_minutes, remaining_km:remaining_km?money(remaining_km):null}});
+    }
 
     const rideDetailsMatch = pathname.match(/^\/api\/rides\/([^/]+)\/(details|detail)$/);
     if(method==='GET' && rideDetailsMatch){

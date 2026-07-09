@@ -46,7 +46,7 @@ import java.util.UUID;
 
 public class MainActivity extends Activity {
     private static final String HOST = "ride.nexoofficial.in";
-    private static final String BASE_URL = "https://" + HOST + "/app/?v=apk7l&native=1";
+    private static final String BASE_URL = "https://" + HOST + "/app/?v=apk8c&native=1";
     private static final String PREFS = "nexo_ride_native_prefs";
     private static final int REQ_PERMISSIONS = 7001;
     private static final int REQ_FILE_CHOOSER = 7002;
@@ -102,7 +102,7 @@ public class MainActivity extends Activity {
         String ua = s.getUserAgentString();
         if (ua == null) ua = "";
         if (!ua.contains("NEXO-Ride-Android")) {
-            s.setUserAgentString(ua + " NEXO-Ride-Android/7J");
+            s.setUserAgentString(ua + " NEXO-Ride-Android/8C");
         }
 
         CookieManager cookies = CookieManager.getInstance();
@@ -271,7 +271,11 @@ public class MainActivity extends Activity {
     }
 
     @Override protected void onNewIntent(Intent intent) { super.onNewIntent(intent); setIntent(intent); String deepUrl = urlFromDeepLink(intent != null ? intent.getData() : null); if (deepUrl != null && webView != null) webView.loadUrl(deepUrl); }
-    @Override public void onBackPressed() { if (webView != null && webView.canGoBack()) webView.goBack(); else super.onBackPressed(); }
+    @Override public void onBackPressed() {
+        if (webView != null && webView.canGoBack()) { webView.goBack(); return; }
+        if (webView != null) { webView.evaluateJavascript("if(document.getElementById(\'bookSheet\')&&document.getElementById(\'bookSheet\').classList.contains(\'show\')){closeSheet();true}else{false}", value -> { if (!"true".equals(value)) moveTaskToBack(true); }); return; }
+        moveTaskToBack(true);
+    }
 
     private String ensureNativeDeviceId() {
         String id = prefs.getString("native_device_id", "");
@@ -281,7 +285,7 @@ public class MainActivity extends Activity {
 
     private String jsEscape(String v) { return v == null ? "" : v.replace("\\", "\\\\").replace("'", "\\'").replace("\n", " ").replace("\r", " "); }
     private void injectNativeReady() {
-        try { webView.evaluateJavascript("window.NEXO_NATIVE_READY=true;window.dispatchEvent(new CustomEvent('nexo-native-ready',{detail:{deviceId:'" + jsEscape(ensureNativeDeviceId()) + "',version:'2.0.7L'}}));", null); } catch (Exception ignored) {}
+        try { webView.evaluateJavascript("window.NEXO_NATIVE_READY=true;window.dispatchEvent(new CustomEvent('nexo-native-ready',{detail:{deviceId:'" + jsEscape(ensureNativeDeviceId()) + "',version:'2.0.8C'}}));", null); } catch (Exception ignored) {}
     }
 
     public class NativeBridge {
@@ -290,7 +294,7 @@ public class MainActivity extends Activity {
         @JavascriptInterface public void openAppSettings() { runOnUiThread(() -> { Intent i = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS); i.setData(Uri.parse("package:" + getPackageName())); startActivity(i); }); }
         @JavascriptInterface public void requestAllPermissions() { runOnUiThread(() -> requestNeededPermissions(true)); }
         @JavascriptInterface public String isNativeApp() { return "true"; }
-        @JavascriptInterface public String version() { return "2.0.7L-NATIVE"; }
+        @JavascriptInterface public String version() { return "2.0.8C-NATIVE"; }
         @JavascriptInterface public String getDeviceId() { return ensureNativeDeviceId(); }
         @JavascriptInterface public String getDeviceInfoJson() { return "{\"device_id\":\"" + ensureNativeDeviceId() + "\",\"platform\":\"ANDROID_APK\",\"device_name\":\"" + Build.MANUFACTURER + " " + Build.MODEL + "\",\"app_version\":\"2.0.7L\"}"; }
         @JavascriptInterface public String getLastLocationJson() {

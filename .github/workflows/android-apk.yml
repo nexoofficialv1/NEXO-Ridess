@@ -1,4 +1,4 @@
-name: Build NEXO Ride APK 8A RC3
+name: Build NEXO Ride APK 8B HOTFIX
 
 on:
   workflow_dispatch:
@@ -63,7 +63,7 @@ jobs:
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: NEXO_Ride_APK_v2_0_8A_RC3_${{ inputs.build_type }}
+          name: NEXO_Ride_APK_v2_0_8B_HOTFIX_${{ inputs.build_type }}
           path: |
             apk/app/build/outputs/apk/debug/*.apk
             apk/app/build/outputs/apk/release/*.apk

@@ -1,0 +1,2 @@
+#!/usr/bin/env node
+console.log(`NEXO Ride Sprint-8K GitHub APK Build Guide\n\n1) GitHub repo খুলুন: NEXO-Ridess\n2) Actions tab খুলুন\n3) APK/Android build workflow select করুন\n4) Run workflow দিন অথবা push হলে auto build হবে\n5) Build শেষ হলে Artifacts থেকে APK download করুন\n\nBefore APK build:\n- Server deploy URL final করুন\n- APK wrapper/base URL production domain-এ point করছে কিনা check করুন\n- Android permissions: Location, Notification, Camera/File picker check করুন\n- Google login deep-link/return-to-app final check করুন\n`);

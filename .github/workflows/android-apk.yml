@@ -15,14 +15,14 @@ on:
 jobs:
   build-apk:
     runs-on: ubuntu-latest
-    name: Build APK Sprint-8A RC3
+    name: Build APK Sprint-8K Market Stable
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Sprint-8A deploy/APK QA precheck
-        run: npm run s8a:check
+      - name: Sprint-8K market/deploy precheck
+        run: npm run s8k:check
 
       - name: Setup Java 17
         uses: actions/setup-java@v4
@@ -63,7 +63,7 @@ jobs:
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
-          name: NEXO_Ride_APK_v2_0_8B_HOTFIX_${{ inputs.build_type }}
+          name: NEXO_Ride_APK_v2_0_8K_MARKET_${{ inputs.build_type }}
           path: |
             apk/app/build/outputs/apk/debug/*.apk
             apk/app/build/outputs/apk/release/*.apk
